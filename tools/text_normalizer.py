@@ -12,7 +12,7 @@ def BlankFunction(text):
 class EnglishSpellingNormalizer:
     """
     [Note]: Taken from OpenAI Whisper repo: https://github.com/openai/whisper/blob/main/whisper/normalizers/english.py#L450
-    
+
     Applies British-American spelling mappings as listed in [1].
 
     [1] https://www.tysto.com/uk-us-spelling-list.html
@@ -30,12 +30,12 @@ filler_words = ["um", "uh", "uhuh", "mhm", "ah", "mm", "mmm", "mn", "hmm", "hm",
 filler_words = {k: False for k in filler_words}
 def clean_text(text, replacers={}, remove_filler_words=True):
     text = text.lower()
-    
+
     for pattern, replacement in replacers.items():
         text = re.sub(pattern, replacement, text)
-            
+
     text = contractions.fix(text)
-    
+
     text = re.sub('(\.)(com|org|net|ai|su)', r' dot \2', text) # fix websites
     text = re.sub('(www\.)([a-z])', r'www dot \2', text) # fix websites
     text = re.sub('-|~|\[.+?\]|\(.+?\)|\{.+?\}|\$|\^|\+|\=|\>|\<|\|', ' ', text) # remove anything insider brackets [..] (..) 
@@ -44,9 +44,9 @@ def clean_text(text, replacers={}, remove_filler_words=True):
     text = text.replace("½", "half")
     text = text.replace("¼", "quarter")
     text = text.replace(" ok ", " okay ")
-            
+
     text = re.sub("\u2019|'", "APSTROPH", text)
-    
+
     text = clean(text,
                  fix_unicode=False,
                  to_ascii=False,
@@ -59,7 +59,7 @@ def clean_text(text, replacers={}, remove_filler_words=True):
                  no_numbers=False,
                  no_digits=False,
                  no_currency_symbols=False)
-    
+
     if remove_filler_words:
         words = []
         for w in text.split(" "):
@@ -67,7 +67,7 @@ def clean_text(text, replacers={}, remove_filler_words=True):
                 words.append(w)
 
         text = " ".join(words)
-    
+
     text = text.replace("APSTROPH", "'")
     text = text.lower()
     return text
@@ -81,7 +81,7 @@ class TextNormalizer:
         self.standardize_spellings = BlankFunction  
         self.normalizer = Normalizer(lang=lang, input_case='cased')
         self.remove_filler_words = remove_filler_words
-        
+
         self.replacers = {}
         if lang=='en':
             self.standardize_spellings = EnglishSpellingNormalizer()
@@ -140,7 +140,7 @@ class TextNormalizer:
                 r"'ve\b": " have",
                 r"'m\b": " am",
             }
-        
+
     def __call__(self, txt):
         norm_txt = []
         for sent in txt.split(". "):
@@ -148,12 +148,12 @@ class TextNormalizer:
             for sub_sent in sent.split(", "):
                 if len(re.sub('[0123456789]', '', sub_sent)) != len(sub_sent):
                     sub_sent = self.normalizer.normalize(sub_sent, verbose=False).strip()
-                    
+
                 if len(sub_sent):
                     norm_sent.append(sub_sent.strip())
-                    
+
             norm_txt.append(", ".join(norm_sent))
-        
+
         norm_txt = [self.standardize_spellings(clean_text(_, replacers=self.replacers, remove_filler_words=self.remove_filler_words)) for _ in norm_txt]
-        
+
         return " ".join(norm_txt)

@@ -1,5 +1,3 @@
-# https://github.com/guillaumekln/faster-whisper/blob/master/faster_whisper/utils.py
-
 import os
 import re
 import requests
@@ -14,60 +12,93 @@ os.makedirs(f"{CACHE_DIR}/models", exist_ok=True)
 
 
 _MODELS = {
-    "tiny.en": "Systran/faster-whisper-tiny.en",
-    "tiny": "Systran/faster-whisper-tiny",
-    "base.en": "Systran/faster-whisper-base.en",
-    "base": "Systran/faster-whisper-base",
-    "small.en": "Systran/faster-whisper-small.en",
-    "small": "Systran/faster-whisper-small",
-    "medium.en": "Systran/faster-whisper-medium.en",
-    "medium": "Systran/faster-whisper-medium",
-    "large-v1": "Systran/faster-whisper-large-v1",
-    "large-v2": "Systran/faster-whisper-large-v2",
-    "large-v3": "Systran/faster-whisper-large-v3",
-    "large": "Systran/faster-whisper-large-v3",
+    "tiny": {
+        "float32": "ctranslate2-4you/whisper-tiny-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-tiny-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-tiny-ct2-bfloat16",
+    },
+    "tiny.en": {
+        "float32": "ctranslate2-4you/whisper-tiny.en-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-tiny.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-tiny.en-ct2-bfloat16",
+    },
+    "base": {
+        "float32": "ctranslate2-4you/whisper-base-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-base-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-base-ct2-bfloat16",
+    },
+    "base.en": {
+        "float32": "ctranslate2-4you/whisper-base.en-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-base.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-base.en-ct2-bfloat16",
+    },
+    "small": {
+        "float32": "ctranslate2-4you/whisper-small-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-small-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-small-ct2-bfloat16",
+    },
+    "small.en": {
+        "float32": "ctranslate2-4you/whisper_small.en-ct2-float32",
+        "float16": "ctranslate2-4you/whisper_small.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper_small.en-ct2-bfloat16",
+    },
+    "medium": {
+        "float32": "ctranslate2-4you/whisper-medium-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-medium-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-medium-ct2-bfloat16",
+    },
+    "medium.en": {
+        "float32": "ctranslate2-4you/whisper-medium.en-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-medium.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-medium.en-ct2-bfloat16",
+    },
+    "large-v3": {
+        "float32": "ctranslate2-4you/whisper-large-v3-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-large-v3-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-large-v3-ct2-bfloat16",
+    },
+    "distil-small.en": {
+        "float32": "ctranslate2-4you/distil-whisper-small.en-ct2-float32",
+        "float16": "ctranslate2-4you/distil-whisper-small.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/distil-whisper-small.en-ct2-bfloat16",
+    },
+    "distil-medium.en": {
+        "float32": "ctranslate2-4you/distil-whisper-medium.en-ct2-float32",
+        "float16": "ctranslate2-4you/distil-whisper-medium.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/distil-whisper-medium.en-ct2-bfloat16",
+    },
+    "distil-large-v3": {
+        "float32": "ctranslate2-4you/distil-whisper-large-v3-ct2-float32",
+        "float16": "ctranslate2-4you/distil-whisper-large-v3-ct2-float16",
+        "bfloat16": "ctranslate2-4you/distil-whisper-large-v3-ct2-bfloat16",
+    },
 }
+
+_MODELS["large"] = _MODELS["large-v3"]
 
 
 def available_models() -> List[str]:
-    """Returns the names of available models."""
     return list(_MODELS.keys())
 
 
 def download_model(
     size_or_id: str,
+    compute_type: str = "float16",
     output_dir: Optional[str] = None,
     local_files_only: bool = False,
     cache_dir: Optional[str] = None,
 ):
-    """Downloads a CTranslate2 Whisper model from the Hugging Face Hub.
-
-    Args:
-      size_or_id: Size of the model to download from https://huggingface.co/guillaumekln
-        (tiny, tiny.en, base, base.en, small, small.en medium, medium.en, large-v1, large-v2,
-        large), or a CTranslate2-converted model ID from the Hugging Face Hub
-        (e.g. guillaumekln/faster-whisper-large-v2).
-      output_dir: Directory where the model should be saved. If not set, the model is saved in
-        the cache directory.
-      local_files_only:  If True, avoid downloading the file and return the path to the local
-        cached file if it exists.
-      cache_dir: Path to the folder where cached files are stored.
-
-    Returns:
-      The path to the downloaded model.
-
-    Raises:
-      ValueError: if the model size is invalid.
-    """
     if re.match(r".*/.*", size_or_id):
         repo_id = size_or_id
     else:
-        repo_id = _MODELS.get(size_or_id)
-        if repo_id is None:
+        model_variants = _MODELS.get(size_or_id)
+        if model_variants is None:
             raise ValueError(
                 "Invalid model size '%s', expected one of: %s"
                 % (size_or_id, ", ".join(_MODELS.keys()))
             )
+
+        repo_id = model_variants[compute_type]
 
     allow_patterns = [
         "config.json",
@@ -96,16 +127,11 @@ def download_model(
         huggingface_hub.utils.HfHubHTTPError,
         requests.exceptions.ConnectionError,
     ) as exception:
-        print(exception)
-        logger = get_logger()
-        logger.warning(
-            "An error occured while synchronizing the model %s from the Hugging Face Hub:\n%s",
-            repo_id,
-            exception,
+        print(
+            "An error occured while synchronizing the model %s from the Hugging Face Hub:\n%s"
+            % (repo_id, exception)
         )
-        logger.warning(
-            "Trying to load the model directly from the local cache, if it exists."
-        )
+        print("Trying to load the model directly from the local cache, if it exists.")
 
         kwargs["local_files_only"] = True
         return huggingface_hub.snapshot_download(repo_id, **kwargs)

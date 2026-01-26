@@ -14,7 +14,7 @@ class NoneTokenizer:
         self.silent_token = 0
         self.no_timestamps = 0
         self.timestamp_begin = 0
-    
+
     def sot_sequence(self, task=None, lang=None):
         return [task, lang]
 
@@ -48,7 +48,7 @@ class WhisperModel(ABC):
                  max_text_token_len=MAX_TEXT_TOKEN_LENGTH,
                  without_timestamps=True,
                  speech_segmenter_options={}):
-        
+
         # Configure Params
         self.device = device
         self.device_index = device_index
@@ -102,40 +102,40 @@ class WhisperModel(ABC):
     def update_params(self, params={}):
         for key, value in params.items():
             setattr(self, key, value)
-        
+
         self._init_dependables()
 
-    
+
     @abstractmethod
     def generate_segment_batched(self, features, prompts):
         pass
-        
+
     @torch.no_grad()
     def transcribe(self, audio_files, lang_codes=None, tasks=None, initial_prompts=None, batch_size=8):
-        
+
         # if lang_codes == None:
         #     lang_codes = len(audio_files)*['en']
-            
+
         # if tasks == None:
         #     tasks = len(audio_files)*['transcribe']
-        
+
         # if initial_prompts == None:
         #     initial_prompts = len(audio_files)*[None]
-            
+
         # responses = []
         # for signals, prompts, seq_len in self.data_loader(audio_files, lang_codes, tasks, initial_prompts, batch_size=batch_size, use_vad=False):
         #     mels, seq_len = self.preprocessor(signals, seq_len)
         #     res = self.generate_segment_batched(mels.to(self.device), prompts)
         #     responses.extend(res)
-        
+
         # return responses
 
         lang_codes = fix_batch_param(lang_codes, 'en', len(audio_files))
         tasks = fix_batch_param(tasks, 'transcribe', len(audio_files))
         initial_prompts = fix_batch_param(initial_prompts, None, len(audio_files))
-            
+
         responses = [[] for _ in audio_files]
-        
+
         pbar_pos = 0
         with tqdm(total=len(audio_files)*100, desc=f"Transcribing") as pbar:
             for signals, prompts, seq_len, seg_metadata, pbar_update in self.data_loader(audio_files, lang_codes, tasks, initial_prompts, batch_size=batch_size, use_vad=False):
@@ -146,13 +146,13 @@ class WhisperModel(ABC):
                     responses[_seg_metadata['file_id']].append({**res[res_idx],
                                                                 'start_time': round(_seg_metadata['start_time'], 3),
                                                                 'end_time': round(_seg_metadata['end_time'], 3)})
-                
+
                 if (pbar_pos) <= pbar.total:
                     pbar_pos += pbar_update
                     pbar.update(pbar_update)
-            
+
             pbar.update(pbar.total-pbar_pos)
-        
+
         return responses
 
     @torch.no_grad()
@@ -161,9 +161,9 @@ class WhisperModel(ABC):
         lang_codes = fix_batch_param(lang_codes, 'en', len(audio_files))
         tasks = fix_batch_param(tasks, 'transcribe', len(audio_files))
         initial_prompts = fix_batch_param(initial_prompts, None, len(audio_files))
-            
+
         responses = [[] for _ in audio_files]
-        
+
         pbar_pos = 0
         with tqdm(total=len(audio_files)*100, desc=f"Transcribing") as pbar:
             for signals, prompts, seq_len, seg_metadata, pbar_update in self.data_loader(audio_files, lang_codes, tasks, initial_prompts, batch_size=batch_size):
@@ -174,11 +174,11 @@ class WhisperModel(ABC):
                     responses[_seg_metadata['file_id']].append({**res[res_idx],
                                                                 'start_time': round(_seg_metadata['start_time'], 3),
                                                                 'end_time': round(_seg_metadata['end_time'], 3)})
-                
+
                 if (pbar_pos) <= pbar.total:
                     pbar_pos += pbar_update
                     pbar.update(pbar_update)
-            
+
             pbar.update(pbar.total-pbar_pos)
-        
+
         return responses

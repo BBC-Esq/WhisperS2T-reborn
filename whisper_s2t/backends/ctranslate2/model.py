@@ -13,20 +13,20 @@ from ...configs import *
 
 FAST_ASR_OPTIONS = {
     "beam_size": 1,
-    "best_of": 1, # Placeholder
+    "best_of": 1,
     "patience": 1,
     "length_penalty": 1,
     "repetition_penalty": 1.01,
     "no_repeat_ngram_size": 0,
-    "compression_ratio_threshold": 2.4, # Placeholder
-    "log_prob_threshold": -1.0, # Placeholder
-    "no_speech_threshold": 0.5, # Placeholder
-    "prefix": None, # Placeholder
+    "compression_ratio_threshold": 2.4,
+    "log_prob_threshold": -1.0,
+    "no_speech_threshold": 0.5,
+    "prefix": None,
     "suppress_blank": True,
     "suppress_tokens": [-1],
     "without_timestamps": True,
     "max_initial_timestamp": 1.0,
-    "word_timestamps": False, # Placeholder
+    "word_timestamps": False,
     "sampling_temperature": 1.0,
     "return_scores": True,
     "return_no_speech_prob": True,
@@ -36,25 +36,34 @@ FAST_ASR_OPTIONS = {
 
 BEST_ASR_CONFIG = {
     "beam_size": 5,
-    "best_of": 1, # Placeholder
+    "best_of": 1,
     "patience": 2,
     "length_penalty": 1,
     "repetition_penalty": 1.01,
     "no_repeat_ngram_size": 0,
-    "compression_ratio_threshold": 2.4, # Placeholder
-    "log_prob_threshold": -1.0, # Placeholder
-    "no_speech_threshold": 0.5, # Placeholder
-    "prefix": None, # Placeholder
+    "compression_ratio_threshold": 2.4,
+    "log_prob_threshold": -1.0,
+    "no_speech_threshold": 0.5,
+    "prefix": None,
     "suppress_blank": True,
     "suppress_tokens": [-1],
     "without_timestamps": True,
     "max_initial_timestamp": 1.0,
-    "word_timestamps": False, # Placeholder
+    "word_timestamps": False,
     "sampling_temperature": 1.0,
     "return_scores": True,
     "return_no_speech_prob": True,
     "word_aligner_model": 'tiny',
 }
+
+
+_SUPPORTED_COMPUTE_TYPES = {"float32", "float16", "bfloat16"}
+
+
+def _normalize_compute_type(compute_type: str) -> str:
+    if compute_type in _SUPPORTED_COMPUTE_TYPES:
+        return compute_type
+    return "float32"
 
 
 class WhisperModelCT2(WhisperModel):
@@ -69,38 +78,35 @@ class WhisperModelCT2(WhisperModel):
                  asr_options={},
                  **model_kwargs):
 
-        
-        # Get local model path or download from huggingface
+        compute_type = _normalize_compute_type(compute_type)
+
         if os.path.isdir(model_name_or_path):
             self.model_path = model_name_or_path
         else:
-            self.model_path = download_model(model_name_or_path)
-        
-        # Load model
+            self.model_path = download_model(model_name_or_path, compute_type=compute_type)
+
         self.model = ctranslate2.models.Whisper(self.model_path,
                                                 device=device,
                                                 device_index=device_index,
                                                 compute_type=compute_type,
                                                 intra_threads=cpu_threads,
                                                 inter_threads=num_workers)
-        
-        # Load tokenizer
+
         tokenizer_file = os.path.join(self.model_path, "tokenizer.json")
         tokenizer = Tokenizer(tokenizers.Tokenizer.from_file(tokenizer_file), self.model.is_multilingual)
 
-        # ASR Options
         self.asr_options = FAST_ASR_OPTIONS
         self.asr_options.update(asr_options)
 
         if self.asr_options['word_timestamps']:
-            self.aligner_model_path = download_model(self.asr_options['word_aligner_model'])
+            self.aligner_model_path = download_model(self.asr_options['word_aligner_model'], compute_type=compute_type)
             self.aligner_model = ctranslate2.models.Whisper(self.aligner_model_path,
                                                             device=device,
                                                             device_index=device_index,
                                                             compute_type=compute_type,
                                                             intra_threads=cpu_threads,
                                                             inter_threads=num_workers)
-        
+
         self.generate_kwargs = {
             "max_length": max_text_token_len,
             "return_scores": self.asr_options['return_scores'],
@@ -130,26 +136,22 @@ class WhisperModelCT2(WhisperModel):
 
         if 'max_text_token_len' in params:
             self.update_params(params={'max_text_token_len': params['max_text_token_len']})
-    
+
     def encode(self, features):
-        """
-        [Not Used]
-        """
-        
         features = ctranslate2.StorageView.from_array(features.contiguous())
         return self.model.encode(features)
 
     def assign_word_timings(self, alignments, text_token_probs, words, word_tokens):
         text_indices = np.array([pair[0] for pair in alignments])
         time_indices = np.array([pair[1] for pair in alignments])
-    
+
         if len(word_tokens) <= 1:
             return []
-            
+
         word_boundaries = np.pad(np.cumsum([len(t) for t in word_tokens[:-1]]), (1, 0))
         if len(word_boundaries) <= 1:
             return []
-    
+
         jumps = np.pad(np.diff(text_indices), (1, 0), constant_values=1).astype(bool)
         jump_times = time_indices[jumps]*TIME_PRECISION
         start_times = jump_times[word_boundaries[:-1]]
@@ -158,7 +160,7 @@ class WhisperModelCT2(WhisperModel):
             np.mean(text_token_probs[i:j])
             for i, j in zip(word_boundaries[:-1], word_boundaries[1:])
         ]
-    
+
         return [
             dict(
                 word=word, start=round(start, 2), end=round(end, 2), prob=round(prob, 2)
@@ -175,7 +177,6 @@ class WhisperModelCT2(WhisperModel):
         start_seq_wise_req = {}
         for _idx, _sot_seq in enumerate(sot_seqs):
             try:
-                # print(_sot_seq)
                 start_seq_wise_req[_sot_seq].append(_idx)
             except:
                 start_seq_wise_req[_sot_seq] = [_idx]
@@ -197,26 +198,26 @@ class WhisperModelCT2(WhisperModel):
                                                      token_alignments[_idx].text_token_probs, 
                                                      word_tokens[_idx][0], 
                                                      word_tokens[_idx][1])
-        
+
             stitched_seg = _seg_metadata['stitched_seg']
 
             current_seg_idx = 0
             current_offset = _seg_metadata['start_time']
-        
+
             for w in _word_timings:
                 while (w['start'] + current_offset) >= stitched_seg[current_seg_idx][1]:
                     current_seg_idx += 1
                     current_offset += (stitched_seg[current_seg_idx][0]-stitched_seg[current_seg_idx-1][1])
-        
+
                 w['start'] += current_offset
                 w['end'] += current_offset
-        
+
             word_timings.append(_word_timings)
 
         return word_timings
-    
+
     def generate_segment_batched(self, features, prompts, seq_lens=None, seg_metadata=None):
-        
+
         if self.device == 'cpu':
             features = np.ascontiguousarray(features.detach().numpy())
         else:
@@ -225,9 +226,9 @@ class WhisperModelCT2(WhisperModel):
         result = self.model.generate(ctranslate2.StorageView.from_array(features),
                                      prompts,
                                      **self.generate_kwargs)
-        
+
         texts = self.tokenizer.decode_batch([x.sequences_ids[0] for x in result])
-        
+
         response = []
         for idx, r in enumerate(result):
             response.append({'text': texts[idx].strip()})

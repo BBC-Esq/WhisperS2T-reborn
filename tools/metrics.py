@@ -13,14 +13,14 @@ def WER(references, hypotheses):
                                       hypotheses,
                                       truth_transform=wer_default, 
                                       hypothesis_transform=wer_default)
-    
+
     out = {
         'WER': round(100*measures['wer'], 2),
         'IER': round(100*measures['insertions']/(measures['hits']+measures['substitutions']+measures['deletions']), 2),
         'DER': round(100*measures['deletions']/(measures['hits']+measures['substitutions']+measures['deletions']), 2),
         'SER': round(100*measures['substitutions']/(measures['hits']+measures['substitutions']+measures['deletions']), 2)
     }
-    
+
     return out
 
 def CER(references, hypotheses):
@@ -71,23 +71,23 @@ def evaluate(references, hypotheses, cer=False, ngram_size=5):
         scores.update({'CER': CER(references, hypotheses), f'{ngram_size}-GramInsertions': NGramInsertions(references, hypotheses, ngram_size=ngram_size)})
     else:
         scores.update({f'{ngram_size}-GramInsertions': NGramInsertions(references, hypotheses,  ngram_size=ngram_size)})
-        
+
     return scores
 
 def word_alignment_accuracy_single(references, hypotheses, collar=0.2):
     # Find diffs between ref and hyp
     r_list = [_['word'].replace(" ", "_") for _ in references]
     h_list = [_['word'].replace(" ", "_") for _ in hypotheses]
-    
+
     orig_words = '\n'.join(r_list) + '\n'
     pred_words = '\n'.join(h_list) + '\n'
-    
+
     diff = diff_match_patch.diff_match_patch()
     diff.Diff_Timeout = 0
     orig_enc, pred_enc, enc = diff.diff_linesToChars(orig_words, pred_words)
     diffs = diff.diff_main(orig_enc, pred_enc, False)
     diff.diff_charsToLines(diffs, enc)
-    
+
     diffs_post = [(d[0], d[1].replace('\n', ' ').strip().split()) for d in diffs]
 
     # Find words which got HIT and their matching
@@ -115,7 +115,7 @@ def word_alignment_accuracy_single(references, hypotheses, collar=0.2):
         if (hypotheses[h_idx]['start']>=references[r_idx]['start']-collar) and (hypotheses[h_idx]['end']<=references[r_idx]['end']+collar):
             within_collar_words += 1
 
-    
+
     results = {
         'acc_overlapped': round(100*overlapped_words/len(word_idx_match), 2),
         'acc_within_collar': round(100*within_collar_words/len(word_idx_match), 2),
