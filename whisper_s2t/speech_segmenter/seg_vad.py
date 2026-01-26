@@ -21,16 +21,13 @@ class SegmentVAD(VADBaseClass):
 
         self.device = device
 
+        # This is a JIT Scripted model of Nvidia's NeMo Marblenet Model: https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/vad_multilingual_marblenet
         if self.device == 'cpu':
-            # This is a JIT Scripted model of Nvidia's NeMo Marblenet Model: https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/vad_multilingual_marblenet
             self.vad_pp = torch.jit.load(os.path.join(BASE_PATH, "assets/vad_pp_cpu.ts")).to(self.device)
             self.vad_model = torch.jit.load(os.path.join(BASE_PATH, "assets/seg_vad_model_cpu.ts")).to(self.device)
         else:
             self.vad_pp = torch.jit.load(os.path.join(BASE_PATH, "assets/vad_pp_gpu.ts")).to(self.device)
             self.vad_model = torch.jit.load(os.path.join(BASE_PATH, "assets/seg_vad_model_gpu.ts")).to(self.device)
-
-        self.vad_pp = torch.jit.load(os.path.join(BASE_PATH, "assets/vad_pp.ts"))
-        self.vad_model = torch.jit.load(os.path.join(BASE_PATH, "assets/segment_vad_model.ts"))
 
         self.vad_model.eval()
         self.vad_model.to(self.device)
@@ -48,7 +45,9 @@ class SegmentVAD(VADBaseClass):
         self.signal_win_len = int(self.win_len*self.sampling_rate)
         self.signal_win_step = int(self.win_step*self.sampling_rate)
 
-    def update_params(self, params={}):
+    def update_params(self, params=None):
+        if params is None:
+            params = {}
         for key, value in params.items():
             setattr(self, key, value)
 
@@ -73,13 +72,13 @@ class SegmentVAD(VADBaseClass):
 
         return input_signal, input_signal_length
 
-    @torch.cuda.amp.autocast()
     @torch.no_grad()
     def forward(self, input_signal, input_signal_length):
-        x, x_len = self.vad_pp(torch.Tensor(input_signal).to(self.device), 
-                               torch.Tensor(input_signal_length).to(self.device))
-        logits = self.vad_model(x, x_len)
-        logits = torch.softmax(logits, dim=-1)
+        with torch.amp.autocast(self.device, enabled=(self.device == 'cuda')):
+            x, x_len = self.vad_pp(torch.Tensor(input_signal).to(self.device), 
+                                   torch.Tensor(input_signal_length).to(self.device))
+            logits = self.vad_model(x, x_len)
+            logits = torch.softmax(logits, dim=-1)
         return logits[:, 1].detach().cpu().numpy()
 
     def __call__(self, audio_signal):

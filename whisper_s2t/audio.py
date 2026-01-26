@@ -3,12 +3,12 @@ import wave
 import tempfile
 import subprocess
 import numpy as np
+import atexit
+from multiprocessing.dummy import Pool
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from multiprocessing.dummy import Pool
 
 from . import BASE_PATH
 from .configs import *
@@ -21,18 +21,30 @@ with tempfile.TemporaryDirectory() as tmpdir:
 
     try: 
         subprocess.check_output(['ffmpeg', '-version'])
-    except:
+    except FileNotFoundError:
         raise RuntimeError(f"Seems 'ffmpeg' is not installed. Please install ffmpeg before using this package!\nCheck: {ffmpeg_install_link}")
 
-    ret_code = os.system(f'ffmpeg -hide_banner -loglevel panic -i "{silent_file}" -threads 1 -acodec pcm_s16le -ac 1 -af aresample=resampler={RESAMPLING_ENGINE} -ar 1600 "{tmpdir}/tmp.wav" -y')
+    result = subprocess.run(
+        ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
+         '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
+         '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', '1600',
+         f'{tmpdir}/tmp.wav', '-y'],
+        capture_output=True
+    )
 
-    if ret_code != 0:
+    if result.returncode != 0:
         print(f"'ffmpeg' failed with soxr resampler, trying 'swr' resampler.")
         RESAMPLING_ENGINE = 'swr'
 
-        ret_code = os.system(f'ffmpeg -hide_banner -loglevel panic -i "{silent_file}" -threads 1 -acodec pcm_s16le -ac 1 -af aresample=resampler={RESAMPLING_ENGINE} -ar 1600 "{tmpdir}/tmp.wav" -y')
+        result = subprocess.run(
+            ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
+             '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
+             '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', '1600',
+             f'{tmpdir}/tmp.wav', '-y'],
+            capture_output=True
+        )
 
-        if ret_code != 0:
+        if result.returncode != 0:
             raise RuntimeError(f"Seems 'ffmpeg' is not installed properly. Please uninstall and install it again.\nCheck: {ffmpeg_install_link}")
         else:
             print(f"Using 'swr' resampler. This may degrade performance.")
@@ -50,8 +62,15 @@ def load_audio(input_file, sr=16000, return_duration=False):
     except:
         with tempfile.TemporaryDirectory() as tmpdir:
             wav_file = f"{tmpdir}/tmp.wav"
-            ret_code = os.system(f'ffmpeg -hide_banner -loglevel panic -i "{input_file}" -threads 1 -acodec pcm_s16le -ac 1 -af aresample=resampler={RESAMPLING_ENGINE} -ar {sr} "{wav_file}" -y')
-            if ret_code != 0: raise RuntimeError("ffmpeg failed to resample the input audio file, make sure ffmpeg is compiled properly!")
+            result = subprocess.run(
+                ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', input_file,
+                 '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
+                 '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', str(sr),
+                 wav_file, '-y'],
+                capture_output=True
+            )
+            if result.returncode != 0:
+                raise RuntimeError("ffmpeg failed to resample the input audio file, make sure ffmpeg is compiled properly!")
 
             with wave.open(wav_file, 'rb') as wf:
                 frames = wf.getnframes()
@@ -66,9 +85,24 @@ def load_audio(input_file, sr=16000, return_duration=False):
         return audio_signal
 
 
-THREAD_POOL_AUDIO_LOADER = Pool(2)
+_THREAD_POOL_AUDIO_LOADER = None
+
+def _get_audio_loader_pool():
+    global _THREAD_POOL_AUDIO_LOADER
+    if _THREAD_POOL_AUDIO_LOADER is None:
+        _THREAD_POOL_AUDIO_LOADER = Pool(2)
+        atexit.register(_cleanup_audio_loader_pool)
+    return _THREAD_POOL_AUDIO_LOADER
+
+def _cleanup_audio_loader_pool():
+    global _THREAD_POOL_AUDIO_LOADER
+    if _THREAD_POOL_AUDIO_LOADER is not None:
+        _THREAD_POOL_AUDIO_LOADER.close()
+        _THREAD_POOL_AUDIO_LOADER.join()
+        _THREAD_POOL_AUDIO_LOADER = None
+
 def audio_batch_generator(audio_files):
-    return THREAD_POOL_AUDIO_LOADER.imap(load_audio, audio_files)
+    return _get_audio_loader_pool().imap(load_audio, audio_files)
 
 
 def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):

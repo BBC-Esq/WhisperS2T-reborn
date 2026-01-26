@@ -75,7 +75,7 @@ class WhisperModelCT2(WhisperModel):
                  device_index=0,
                  compute_type="float16",
                  max_text_token_len=MAX_TEXT_TOKEN_LENGTH,
-                 asr_options={},
+                 asr_options=None,
                  **model_kwargs):
 
         compute_type = _normalize_compute_type(compute_type)
@@ -95,7 +95,9 @@ class WhisperModelCT2(WhisperModel):
         tokenizer_file = os.path.join(self.model_path, "tokenizer.json")
         tokenizer = Tokenizer(tokenizers.Tokenizer.from_file(tokenizer_file), self.model.is_multilingual)
 
-        self.asr_options = FAST_ASR_OPTIONS
+        if asr_options is None:
+            asr_options = {}
+        self.asr_options = FAST_ASR_OPTIONS.copy()
         self.asr_options.update(asr_options)
 
         if self.asr_options['word_timestamps']:
@@ -131,7 +133,9 @@ class WhisperModelCT2(WhisperModel):
             **model_kwargs
         )
 
-    def update_generation_kwargs(self, params={}):
+    def update_generation_kwargs(self, params=None):
+        if params is None:
+            params = {}
         self.generate_kwargs.update(params)
 
         if 'max_text_token_len' in params:

@@ -22,8 +22,8 @@ class FrameVAD(VADBaseClass):
 
         self.device = device
 
+        # This is a JIT Scripted model of Nvidia's NeMo Framewise Marblenet Model: https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/vad_multilingual_frame_marblenet
         if self.device == 'cpu':
-            # This is a JIT Scripted model of Nvidia's NeMo Framewise Marblenet Model: https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/vad_multilingual_frame_marblenet
             self.vad_pp = torch.jit.load(os.path.join(BASE_PATH, "assets/vad_pp_cpu.ts")).to(self.device)
             self.vad_model = torch.jit.load(os.path.join(BASE_PATH, "assets/frame_vad_model_cpu.ts")).to(self.device)
         else:
@@ -50,7 +50,9 @@ class FrameVAD(VADBaseClass):
         self.vad_pp.to(self.device)
         self.vad_model.to(self.device)
 
-    def update_params(self, params={}):
+    def update_params(self, params=None):
+        if params is None:
+            params = {}
         for key, value in params.items():
             setattr(self, key, value)
 
@@ -71,17 +73,17 @@ class FrameVAD(VADBaseClass):
 
         return input_signal, input_signal_length
 
-    @torch.cuda.amp.autocast()
     @torch.no_grad()
     def forward(self, input_signal, input_signal_length):
 
         all_logits = []
         for s_idx in range(0, len(input_signal), self.batch_size):
-            input_signal_pt = torch.stack([torch.tensor(_, device=self.device) for _ in input_signal[s_idx:s_idx+self.batch_size]])
-            input_signal_length_pt = torch.tensor(input_signal_length[s_idx:s_idx+self.batch_size], device=self.device)
+            with torch.amp.autocast(self.device, enabled=(self.device == 'cuda')):
+                input_signal_pt = torch.stack([torch.tensor(_, device=self.device) for _ in input_signal[s_idx:s_idx+self.batch_size]])
+                input_signal_length_pt = torch.tensor(input_signal_length[s_idx:s_idx+self.batch_size], device=self.device)
 
-            x, x_len = self.vad_pp(input_signal_pt, input_signal_length_pt)
-            logits = self.vad_model(x, x_len)
+                x, x_len = self.vad_pp(input_signal_pt, input_signal_length_pt)
+                logits = self.vad_model(x, x_len)
 
             for _logits, _len in zip(logits, input_signal_length_pt):
                 all_logits.append(_logits[:int(_len/self.signal_to_logit_len)])

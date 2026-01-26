@@ -9,7 +9,7 @@ class VADBaseClass(ABC):
         self.sampling_rate = sampling_rate
 
     @abstractmethod
-    def update_params(self, params={}):
+    def update_params(self, params=None):
         pass
 
     @abstractmethod
@@ -50,14 +50,18 @@ class SpeechSegmenter:
         self.cut_idx = int(self.max_seg_len/(self.cut_factor*self.frame_size))
         self.max_idx_in_seg = self.cut_factor*self.cut_idx
 
-    def update_params(self, params={}):
+    def update_params(self, params=None):
+        if params is None:
+            params = {}
         for key, value in params.items():
             setattr(self, key, value)
 
         self.cut_idx = int(self.max_seg_len/(self.cut_factor*self.frame_size))
         self.max_idx_in_seg = self.cut_factor*self.cut_idx
 
-    def update_vad_model_params(self, params={}):
+    def update_vad_model_params(self, params=None):
+        if params is None:
+            params = {}
         self.vad_model.update_params(params=params)
 
     def okay_to_merge(self, speech_probs, last_seg, curr_seg):
