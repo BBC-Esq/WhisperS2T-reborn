@@ -40,7 +40,7 @@ This fork simplifies the original WhisperS2T by:
 
 ### Prerequisites
 
-Install FFmpeg for audio processing:
+**FFmpeg** is required for audio processing:
 
 **Ubuntu/Debian:**
 ```sh
@@ -57,9 +57,9 @@ brew install ffmpeg
 conda install conda-forge::ffmpeg
 ```
 
-### Install WhisperS2T-Reborn
+**GPU Support:** For GPU-accelerated inference, you need an NVIDIA GPU with a compatible CUDA Toolkit and cuDNN installed at the system level. Refer to the [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) documentation for installation instructions.
 
-**CPU only:**
+### Install WhisperS2T-Reborn
 ```sh
 pip install whisper-s2t-reborn
 ```
