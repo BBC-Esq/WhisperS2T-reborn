@@ -63,11 +63,7 @@ conda install conda-forge::ffmpeg
 ```sh
 pip install whisper-s2t-reborn
 ```
-
-**With GPU support (recommended for faster inference):**
-```sh
-pip install whisper-s2t-reborn[gpu]
-```
+> If you don't already have CUDA libraries installed on your system, use ```pip install whisper-s2t-reborn[gpu]``` to install them via pip.
 
 > **Note:** The `[gpu]` extra installs NVIDIA CUDA libraries required for GPU acceleration with CTranslate2. Requires an NVIDIA GPU with compatible drivers.
 
