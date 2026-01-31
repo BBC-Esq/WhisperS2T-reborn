@@ -6,35 +6,8 @@
 WhisperS2T-Reborn is a streamlined fork of the original [WhisperS2T](https://github.com/shashikg/WhisperS2T) project, focused exclusively on the CTranslate2 backend for fast and efficient speech transcription.
 
 ## What's Different from the Original?
-
-This fork simplifies the original WhisperS2T by:
-
-- **Single Backend Focus**: Removed TensorRT-LLM, HuggingFace, and OpenAI backends—CTranslate2 only
+- Removed TensorRT-LLM, HuggingFace, and OpenAI backends—CTranslate2 only
 - **Curated Model Selection**: Uses optimized CTranslate2 whisper models from [ctranslate2-4you](https://huggingface.co/ctranslate2-4you) on HuggingFace
-- **Cleaner Codebase**: Streamlined architecture with reduced dependencies
-- **Simplified Setup**: Easier installation without complex backend configurations
-
-## Features
-
-- 🚀 **Fast Inference**: CTranslate2 backend provides excellent speed/accuracy tradeoff
-- 🎙️ **Built-in VAD**: Integrated Voice Activity Detection using NeMo's Marblenet models
-- 🎧 **Flexible Audio Input**: Handles both small and large audio files efficiently
-- 🌐 **Multi-language Support**: Transcription and translation for 99+ languages
-- ⏱️ **Word-level Timestamps**: Optional word alignment for precise timing
-- 📝 **Multiple Export Formats**: Export to TXT, JSON, TSV, SRT, and VTT
-
-## Supported Models
-
-| Model | English-only | Multilingual |
-|-------|--------------|--------------|
-| tiny | ✅ tiny.en | ✅ tiny |
-| base | ✅ base.en | ✅ base |
-| small | ✅ small.en | ✅ small |
-| medium | ✅ medium.en | ✅ medium |
-| large-v3 | — | ✅ large-v3 |
-| distil-small.en | ✅ | — |
-| distil-medium.en | ✅ | — |
-| distil-large-v3 | — | ✅ |
 
 ## Installation
 
@@ -147,9 +120,5 @@ out = model.transcribe_with_vad(
 )
 ```
 
-## Acknowledgements
-
-- [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): This project is a fork of WhisperS2T by Shashi Kant Gupta
-- [**OpenAI Whisper**](https://github.com/openai/whisper): The foundational Whisper model
-- [**CTranslate2**](https://github.com/OpenNMT/CTranslate2/): Fast inference engine for Transformer models
-- [**NVIDIA NeMo**](https://github.com/NVIDIA/NeMo): VAD models used in this pipeline
+## Community Projects
+[Batch Audio File Transcriber](https://github.com/BBC-Esq/WhisperS2T-transcriber)
