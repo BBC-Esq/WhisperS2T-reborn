@@ -14,13 +14,13 @@ authors = [
 ]
 dependencies = [
     "torch>=2.8.0,<=2.9.1",
-    "numpy>=2.4.1,<3.0.0",
-    "tqdm>=4.67.1",
-    "rich>=14.3.1",
-    "platformdirs>=4.5.1",
+    "numpy>=1.26.4,<3.0.0",
+    "tqdm",
+    "rich",
+    "platformdirs",
     "ctranslate2==4.6.2",
-    "tokenizers>=0.22.2",
-    "huggingface-hub>=0.36.0",
+    "tokenizers",
+    "huggingface-hub",
 ]
 
 [project.optional-dependencies]
