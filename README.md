@@ -5,17 +5,15 @@
 </h1>
 <p align="center"><b>A Streamlined Speech-to-Text Pipeline for Whisper Models using CTranslate2</b></p>
 
-<hr><br>
+<hr>
 
-## Installation
-
-### Prerequisites
+## Prerequisites
 
 **FFmpeg** is required for audio processing
 
 **GPU Support:** For GPU-accelerated inference using an Nvidia GPU, you need a compatible CUDA Toolkit and cuDNN installed. Refer to the [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) documentation for installation instructions.
 
-### Install WhisperS2T-Reborn
+### Installation
 ```sh
 pip install whisper-s2t-reborn
 ```
@@ -103,5 +101,10 @@ out = model.transcribe_with_vad(
 )
 ```
 
-## Community Projects
+<h1 align="center">
+
+Community Projects
+
+</h1>
+
 [Batch Audio File Transcriber](https://github.com/BBC-Esq/WhisperS2T-transcriber)
