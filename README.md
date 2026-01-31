@@ -1,36 +1,19 @@
-<h1 align="center">WhisperS2T-Reborn ⚡</h1>
+<h1 align="center">
+
+<img width="1536" height="385" alt="splash" src="https://github.com/user-attachments/assets/a27db29b-8ff0-4436-a726-18f26f523dbd" />
+
+</h1>
 <p align="center"><b>A Streamlined Speech-to-Text Pipeline for Whisper Models using CTranslate2</b></p>
 
 <hr><br>
-
-WhisperS2T-Reborn is a streamlined fork of the original [WhisperS2T](https://github.com/shashikg/WhisperS2T) project, focused exclusively on the CTranslate2 backend for fast and efficient speech transcription.
-
-## What's Different from the Original?
-- Removed TensorRT-LLM, HuggingFace, and OpenAI backends—CTranslate2 only
-- **Curated Model Selection**: Uses optimized CTranslate2 whisper models from [ctranslate2-4you](https://huggingface.co/ctranslate2-4you) on HuggingFace
 
 ## Installation
 
 ### Prerequisites
 
-**FFmpeg** is required for audio processing:
+**FFmpeg** is required for audio processing
 
-**Ubuntu/Debian:**
-```sh
-apt-get install -y libsndfile1 ffmpeg
-```
-
-**macOS:**
-```sh
-brew install ffmpeg
-```
-
-**Conda (any platform):**
-```sh
-conda install conda-forge::ffmpeg
-```
-
-**GPU Support:** For GPU-accelerated inference, you need an NVIDIA GPU with a compatible CUDA Toolkit and cuDNN installed at the system level. Refer to the [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) documentation for installation instructions.
+**GPU Support:** For GPU-accelerated inference using an Nvidia GPU, you need a compatible CUDA Toolkit and cuDNN installed. Refer to the [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) documentation for installation instructions.
 
 ### Install WhisperS2T-Reborn
 ```sh
