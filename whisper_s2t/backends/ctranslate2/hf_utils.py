@@ -38,9 +38,9 @@ _MODELS = {
         "bfloat16": "ctranslate2-4you/whisper-small-ct2-bfloat16",
     },
     "small.en": {
-        "float32": "ctranslate2-4you/whisper_small.en-ct2-float32",
-        "float16": "ctranslate2-4you/whisper_small.en-ct2-float16",
-        "bfloat16": "ctranslate2-4you/whisper_small.en-ct2-bfloat16",
+        "float32": "ctranslate2-4you/whisper-small.en-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-small.en-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-small.en-ct2-bfloat16",
     },
     "medium": {
         "float32": "ctranslate2-4you/whisper-medium-ct2-float32",
