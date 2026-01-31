@@ -13,14 +13,15 @@ authors = [
     {name = "Blair Chintella"}
 ]
 dependencies = [
-    "torch>=2.8.0,<=2.9.1",
-    "numpy>=1.26.4,<3.0.0",
-    "tqdm",
-    "rich",
-    "platformdirs",
     "ctranslate2==4.6.2",
-    "tokenizers",
     "huggingface-hub",
+    "numpy>=1.26.4,<3.0.0",
+    "platformdirs",
+    "requests",
+    "rich",
+    "tokenizers",
+    "torch>=2.8.0,<=2.9.1",
+    "tqdm",
 ]
 
 [project.optional-dependencies]
