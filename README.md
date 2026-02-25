@@ -1,6 +1,6 @@
 <h1 align="center">
 
-<img width="1536" height="385" alt="splash" src="https://github.com/user-attachments/assets/a27db29b-8ff0-4436-a726-18f26f523dbd" />
+<img width="1536" height="611" alt="image" src="https://github.com/user-attachments/assets/8383d4c3-c6df-4f5a-aba4-14b05a67271c" />
 
 </h1>
 <p align="center"><b>A Streamlined Speech-to-Text Pipeline for Whisper Models using CTranslate2</b></p>
