@@ -6,9 +6,7 @@ WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashi
 
 [**Whisper**](https://github.com/openai/whisper) is a general-purpose speech recognition model developed by OpenAI. It is trained on a large dataset of diverse audio and is also a multitasking model that can perform multilingual speech recognition, speech translation, and language identification.
 
-## Getting Started
-
-### Installation
+## Installation
 
 You must install FFMPEG on your system first.
 
@@ -18,7 +16,7 @@ Install or update to the latest released version of WhisperS2T-Reborn:
 pip install -U whisper-s2t-reborn
 ```
 
-### Quick Start
+## Quick Start
 
 #### Transcribe a single file
 
