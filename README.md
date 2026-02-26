@@ -1,110 +1,121 @@
-<h1 align="center">
+<h1 align="center"> WhisperS2T-Reborn ⚡ </h1>
+<p align="center"><b>An Optimized Speech-to-Text Pipeline for the Whisper Model Using CTranslate2</b></p>
+<p align="center">
+    <a href="https://www.pepy.tech/projects/whisper-s2t-reborn">
+        <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/whisper-s2t-reborn?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=downloads" />
+    </a>
+    <a href="https://github.com/BBC-Esq/WhisperS2T-reborn">
+        <img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/BBC-Esq/WhisperS2T-reborn" />
+    </a>
+    <a href="https://badge.fury.io/py/whisper-s2t-reborn">
+        <img alt="PyPi Release Version" src="https://badge.fury.io/py/whisper-s2t-reborn.svg" />
+    </a>
+    <a href="https://github.com/BBC-Esq/WhisperS2T-reborn/issues">
+        <img alt="Issues" src="https://img.shields.io/github/issues/BBC-Esq/WhisperS2T-reborn?color=0088ff" />
+    </a>
+</p>
+<hr><br>
 
-<img width="1536" height="611" alt="image" src="https://github.com/user-attachments/assets/8383d4c3-c6df-4f5a-aba4-14b05a67271c" />
+WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashikg/WhisperS2T), an optimized lightning-fast open-sourced **Speech-to-Text** (ASR) pipeline. It is tailored for the Whisper model using the CTranslate2 backend to provide faster transcription. It includes several heuristics to enhance transcription accuracy.
 
-</h1>
-<p align="center"><b>A Streamlined Speech-to-Text Pipeline for Whisper Models using CTranslate2</b></p>
+[**Whisper**](https://github.com/openai/whisper) is a general-purpose speech recognition model developed by OpenAI. It is trained on a large dataset of diverse audio and is also a multitasking model that can perform multilingual speech recognition, speech translation, and language identification.
 
-<hr>
+## Features
 
-## Requirements
+- 🎙️ **Easy Integration of Custom VAD Models:** Seamlessly add custom Voice Activity Detection (VAD) models to enhance control and accuracy in speech recognition.
+- 🎧 **Effortless Handling of Small or Large Audio Files:** Intelligently batch smaller speech segments from various files, ensuring optimal performance.
+- ⏳ **Streamlined Processing for Large Audio Files:** Asynchronously loads large audio files in the background while transcribing segmented batches, notably reducing loading times.
+- 🌐 **Batching Support with Multiple Language/Task Decoding:** Decode multiple languages or perform both transcription and translation in a single batch for improved versatility and transcription time.
+- 🧠 **Reduction in Hallucination:** Optimized parameters and heuristics to decrease repeated text output or hallucinations.
+- ⏱️ **Dynamic Time Length Support (Experimental):** Process variable-length inputs in a given input batch instead of fixed 30 seconds, providing flexibility and saving computation time during transcription.
 
-**FFmpeg** is required for audio processing
 
-**GPU Support:** For GPU-accelerated inference using an Nvidia GPU, you need a compatible CUDA Toolkit and cuDNN installed. Refer to the [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) documentation for installation instructions.
+## Getting Started
 
 ### Installation
+
+Install audio packages required for resampling and loading audio files.
+
+#### For Ubuntu
 ```sh
-pip install whisper-s2t-reborn
+apt-get install -y libsndfile1 ffmpeg
 ```
 
-## Quick Start
+#### For MAC
+```sh
+brew install ffmpeg
+```
 
-### Basic Transcription
-```python
+#### For Ubuntu/MAC/Windows/AnyOther With Conda for Python
+```sh
+conda install conda-forge::ffmpeg
+```
+
+To install or update to the latest released version of WhisperS2T-Reborn use the following command:
+
+```sh
+pip install -U whisper-s2t-reborn
+```
+
+Or to install from the latest commit in this repo:
+
+```sh
+pip install -U git+https://github.com/BBC-Esq/WhisperS2T-reborn.git
+```
+
+**NOTE:** If your CUDNN and CUBLAS installation is done using pip wheel, you can run the following to add CUDNN path to `LD_LIBRARY_PATH`:
+
+```sh
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__))'`
+```
+
+### Usage
+
+```py
 import whisper_s2t
 
-# Load model (downloads automatically on first use)
 model = whisper_s2t.load_model(model_identifier="large-v3")
 
-# Transcribe with VAD
-files = ['audio/sample.wav']
+files = ['data/KINCAID46/audio/1.wav']
+lang_codes = ['en']
+tasks = ['transcribe']
+initial_prompts = [None]
+
 out = model.transcribe_with_vad(files,
-                                lang_codes=['en'],
-                                tasks=['transcribe'],
-                                initial_prompts=[None],
+                                lang_codes=lang_codes,
+                                tasks=tasks,
+                                initial_prompts=initial_prompts,
                                 batch_size=32)
 
-print(out[0][0])
-# {'text': 'Your transcribed text here...',
-#  'avg_logprob': -0.25,
-#  'no_speech_prob': 0.0001,
-#  'start_time': 0.0,
-#  'end_time': 24.8}
+print(out[0][0]) # Print first utterance for first file
+"""
+[Console Output]
+
+{'text': "Let's bring in Phil Mackie who is there at the palace. We're looking at Teresa and Philip May. Philip, can you see how he's being transferred from the helicopters? It looks like, as you said, the beast. It's got its headlights on because the sun is beginning to set now, certainly sinking behind some clouds. It's about a quarter of a mile away down the Grand Drive",
+ 'avg_logprob': -0.25426941679184695,
+ 'no_speech_prob': 8.147954940795898e-05,
+ 'start_time': 0.0,
+ 'end_time': 24.8}
+"""
 ```
 
-### With Word Timestamps
-```python
+To enable word-level alignment, load the model with:
+
+```py
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
-
-out = model.transcribe_with_vad(files,
-                                lang_codes=['en'],
-                                tasks=['transcribe'],
-                                initial_prompts=[None],
-                                batch_size=32)
 ```
 
-### Export Transcripts
-```python
-from whisper_s2t import write_outputs
+**NOTE:** For first run the model may give slightly slower inference speed. After 1-2 runs it will give better inference speed. This is due to the JIT tracing of the VAD model.
 
-# Export to various formats
-write_outputs(out, format='srt', save_dir='./output/')
-write_outputs(out, format='vtt', save_dir='./output/')
-write_outputs(out, format='json', save_dir='./output/')
-```
 
-### Translation
-```python
-# Translate non-English audio to English
-out = model.transcribe_with_vad(files,
-                                lang_codes=['fr'],  # Source language
-                                tasks=['translate'],  # Translate to English
-                                initial_prompts=[None],
-                                batch_size=32)
-```
+## Acknowledgements
+- [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashikg for the original WhisperS2T project that this fork is based on.
+- [**OpenAI Whisper Team**](https://github.com/openai/whisper): Thanks to the OpenAI Whisper Team for open-sourcing the Whisper model.
+- [**CTranslate2 Team**](https://github.com/OpenNMT/CTranslate2/): Thanks to the CTranslate2 Team for providing a faster inference engine for Transformers architecture.
+- [**NVIDIA NeMo Team**](https://github.com/NVIDIA/NeMo): Thanks to the NVIDIA NeMo Team for their contribution of the open-source VAD model used in this pipeline.
 
-## Configuration Options
 
-### Model Loading Options
-```python
-model = whisper_s2t.load_model(
-    model_identifier="large-v3",  # Model name or path
-    device="cuda",                 # "cuda" or "cpu"
-    compute_type="float16",        # "float16", "float32", or "bfloat16"
-    asr_options={
-        'beam_size': 5,
-        'word_timestamps': False,
-        'repetition_penalty': 1.01,
-    }
-)
-```
+## License
 
-### Transcription Options
-```python
-out = model.transcribe_with_vad(
-    files,
-    lang_codes=['en'],           # Language codes for each file
-    tasks=['transcribe'],        # 'transcribe' or 'translate'
-    initial_prompts=[None],      # Optional prompts for each file
-    batch_size=32                # Batch size for inference
-)
-```
+This project is licensed under MIT License - see the [LICENSE](LICENSE) file for details.
 
-<h1 align="center">
-
-Community Projects
-
-</h1>
-
-[Batch Audio File Transcriber](https://github.com/BBC-Esq/WhisperS2T-transcriber)
