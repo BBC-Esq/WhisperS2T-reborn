@@ -54,9 +54,6 @@ To enable word-level alignment, load the model with:
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
 
-**NOTE:** For first run the model may give slightly slower inference speed. After 1-2 runs it will give better inference speed. This is due to the JIT tracing of the VAD model.
-
-
 ## Acknowledgements
 - [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
 - [**OpenAI Whisper Team**](https://github.com/openai/whisper): Thanks to the OpenAI Whisper Team for open-sourcing the Whisper model.
