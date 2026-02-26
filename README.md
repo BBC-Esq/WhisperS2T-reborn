@@ -1,9 +1,6 @@
 <h1 align="center"> WhisperS2T-Reborn ⚡ </h1>
 <p align="center"><b>An Optimized Speech-to-Text Pipeline for the Whisper Model Using CTranslate2</b></p>
 <p align="center">
-    <a href="https://www.pepy.tech/projects/whisper-s2t-reborn">
-        <img alt="Downloads" src="https://static.pepy.tech/personalized-badge/whisper-s2t-reborn?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=downloads" />
-    </a>
     <a href="https://github.com/BBC-Esq/WhisperS2T-reborn">
         <img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/BBC-Esq/WhisperS2T-reborn" />
     </a>
@@ -20,53 +17,16 @@ WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashi
 
 [**Whisper**](https://github.com/openai/whisper) is a general-purpose speech recognition model developed by OpenAI. It is trained on a large dataset of diverse audio and is also a multitasking model that can perform multilingual speech recognition, speech translation, and language identification.
 
-## Features
-
-- 🎙️ **Easy Integration of Custom VAD Models:** Seamlessly add custom Voice Activity Detection (VAD) models to enhance control and accuracy in speech recognition.
-- 🎧 **Effortless Handling of Small or Large Audio Files:** Intelligently batch smaller speech segments from various files, ensuring optimal performance.
-- ⏳ **Streamlined Processing for Large Audio Files:** Asynchronously loads large audio files in the background while transcribing segmented batches, notably reducing loading times.
-- 🌐 **Batching Support with Multiple Language/Task Decoding:** Decode multiple languages or perform both transcription and translation in a single batch for improved versatility and transcription time.
-- 🧠 **Reduction in Hallucination:** Optimized parameters and heuristics to decrease repeated text output or hallucinations.
-- ⏱️ **Dynamic Time Length Support (Experimental):** Process variable-length inputs in a given input batch instead of fixed 30 seconds, providing flexibility and saving computation time during transcription.
-
-
 ## Getting Started
 
 ### Installation
 
-Install audio packages required for resampling and loading audio files.
+You must install FFMPEG on your system first.
 
-#### For Ubuntu
-```sh
-apt-get install -y libsndfile1 ffmpeg
-```
-
-#### For MAC
-```sh
-brew install ffmpeg
-```
-
-#### For Ubuntu/MAC/Windows/AnyOther With Conda for Python
-```sh
-conda install conda-forge::ffmpeg
-```
-
-To install or update to the latest released version of WhisperS2T-Reborn use the following command:
+Install or update to the latest released version of WhisperS2T-Reborn:
 
 ```sh
 pip install -U whisper-s2t-reborn
-```
-
-Or to install from the latest commit in this repo:
-
-```sh
-pip install -U git+https://github.com/BBC-Esq/WhisperS2T-reborn.git
-```
-
-**NOTE:** If your CUDNN and CUBLAS installation is done using pip wheel, you can run the following to add CUDNN path to `LD_LIBRARY_PATH`:
-
-```sh
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__))'`
 ```
 
 ### Usage
