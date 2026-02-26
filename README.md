@@ -1,17 +1,6 @@
 <h1 align="center"> WhisperS2T-Reborn ⚡ </h1>
 <p align="center"><b>An Optimized Speech-to-Text Pipeline for the Whisper Model Using CTranslate2</b></p>
-<p align="center">
-    <a href="https://github.com/BBC-Esq/WhisperS2T-reborn">
-        <img alt="GitHub Contributors" src="https://img.shields.io/github/contributors/BBC-Esq/WhisperS2T-reborn" />
-    </a>
-    <a href="https://badge.fury.io/py/whisper-s2t-reborn">
-        <img alt="PyPi Release Version" src="https://badge.fury.io/py/whisper-s2t-reborn.svg" />
-    </a>
-    <a href="https://github.com/BBC-Esq/WhisperS2T-reborn/issues">
-        <img alt="Issues" src="https://img.shields.io/github/issues/BBC-Esq/WhisperS2T-reborn?color=0088ff" />
-    </a>
-</p>
-<hr><br>
+<br>
 
 WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashikg/WhisperS2T), an optimized lightning-fast open-sourced **Speech-to-Text** (ASR) pipeline. It is tailored for the Whisper model using the CTranslate2 backend to provide faster transcription. It includes several heuristics to enhance transcription accuracy.
 
@@ -29,7 +18,7 @@ Install or update to the latest released version of WhisperS2T-Reborn:
 pip install -U whisper-s2t-reborn
 ```
 
-### Usage
+### Quick Start
 
 ```py
 import whisper_s2t
