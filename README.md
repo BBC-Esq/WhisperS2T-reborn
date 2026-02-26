@@ -58,7 +58,7 @@ model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True}
 
 
 ## Acknowledgements
-- [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashikg for the original WhisperS2T project that this fork is based on.
+- [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
 - [**OpenAI Whisper Team**](https://github.com/openai/whisper): Thanks to the OpenAI Whisper Team for open-sourcing the Whisper model.
 - [**CTranslate2 Team**](https://github.com/OpenNMT/CTranslate2/): Thanks to the CTranslate2 Team for providing a faster inference engine for Transformers architecture.
 - [**NVIDIA NeMo Team**](https://github.com/NVIDIA/NeMo): Thanks to the NVIDIA NeMo Team for their contribution of the open-source VAD model used in this pipeline.
