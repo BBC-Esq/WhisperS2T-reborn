@@ -20,12 +20,14 @@ pip install -U whisper-s2t-reborn
 
 ### Quick Start
 
+#### Transcribe a single file
+
 ```py
 import whisper_s2t
 
 model = whisper_s2t.load_model(model_identifier="large-v3")
 
-files = ['data/KINCAID46/audio/1.wav']
+files = ['audio1.wav']
 lang_codes = ['en']
 tasks = ['transcribe']
 initial_prompts = [None]
@@ -40,7 +42,7 @@ print(out[0][0]) # Print first utterance for first file
 """
 [Console Output]
 
-{'text': "Let's bring in Phil Mackie who is there at the palace. We're looking at Teresa and Philip May. Philip, can you see how he's being transferred from the helicopters? It looks like, as you said, the beast. It's got its headlights on because the sun is beginning to set now, certainly sinking behind some clouds. It's about a quarter of a mile away down the Grand Drive",
+{'text': "Let's bring in Phil Mackie who is there at the palace...",
  'avg_logprob': -0.25426941679184695,
  'no_speech_prob': 8.147954940795898e-05,
  'start_time': 0.0,
@@ -48,7 +50,34 @@ print(out[0][0]) # Print first utterance for first file
 """
 ```
 
-To enable word-level alignment, load the model with:
+#### Batch across multiple files
+
+Passing multiple files allows segments from different files to be batched together, making better use of the GPU:
+
+```py
+import whisper_s2t
+
+model = whisper_s2t.load_model(model_identifier="large-v3")
+
+files = ['audio1.wav', 'audio2.wav', 'audio3.wav']
+lang_codes = ['en', 'en', 'en']
+tasks = ['transcribe', 'transcribe', 'transcribe']
+initial_prompts = [None, None, None]
+
+out = model.transcribe_with_vad(files,
+                                lang_codes=lang_codes,
+                                tasks=tasks,
+                                initial_prompts=initial_prompts,
+                                batch_size=32)
+
+# out[0] = results for audio1.wav, out[1] = results for audio2.wav, etc.
+for file_idx, transcript in enumerate(out):
+    print(f"File {files[file_idx]}: {len(transcript)} segments")
+```
+
+#### Word-level alignment
+
+To enable word-level timestamps, load the model with:
 
 ```py
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
