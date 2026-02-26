@@ -7,7 +7,7 @@
 
 <hr>
 
-## Prerequisites
+## Requirements
 
 **FFmpeg** is required for audio processing
 
