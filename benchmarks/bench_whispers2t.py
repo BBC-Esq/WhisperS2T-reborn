@@ -1,8 +1,9 @@
 """
 Benchmark script for whisper-s2t-reborn (CTranslate2-based Whisper inference with built-in VAD).
 
-Required:  pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu124
-           pip install whisper-s2t-reborn av nvidia-ml-py
+Required:  pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
+           pip install whisper-s2t-reborn av
+           pip install nvidia-cuda-runtime-cu12==12.8.90 nvidia-cublas-cu12==12.8.4.1 nvidia-cudnn-cu12==9.10.2.21 nvidia-ml-py==13.580.82
 
 Audio used for README benchmarks:
   https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac
@@ -13,6 +14,8 @@ Usage:
   python bench_whispers2t.py --audio path/to/audio.flac --model large-v3-turbo
 """
 import os
+import sys
+import platform
 from pathlib import Path
 
 import argparse
@@ -21,6 +24,47 @@ import time
 import threading
 import wave
 from multiprocessing import Process, Pipe
+
+
+def set_cuda_paths():
+    if platform.system() != "Windows":
+        return
+    venv_base = Path(sys.executable).parent.parent
+    nvidia_base = venv_base / "Lib" / "site-packages" / "nvidia"
+    if not nvidia_base.exists():
+        return
+    paths_to_add = [
+        nvidia_base / "cuda_runtime" / "bin",
+        nvidia_base / "cuda_runtime" / "lib" / "x64",
+        nvidia_base / "cuda_runtime" / "include",
+        nvidia_base / "cublas" / "bin",
+        nvidia_base / "cudnn" / "bin",
+        nvidia_base / "cuda_nvrtc" / "bin",
+        nvidia_base / "cuda_nvcc" / "bin",
+    ]
+    current_value = os.environ.get("PATH", "")
+    new_value = os.pathsep.join(
+        [str(p) for p in paths_to_add] + ([current_value] if current_value else [])
+    )
+    os.environ["PATH"] = new_value
+    triton_cuda_path = nvidia_base / "cuda_runtime"
+    current_cuda_path = os.environ.get("CUDA_PATH", "")
+    new_cuda_path = os.pathsep.join(
+        [str(triton_cuda_path)]
+        + ([current_cuda_path] if current_cuda_path else [])
+    )
+    os.environ["CUDA_PATH"] = new_cuda_path
+    if hasattr(os, "add_dll_directory"):
+        for path in paths_to_add:
+            if path.exists():
+                try:
+                    os.add_dll_directory(str(path))
+                except OSError:
+                    pass
+
+
+set_cuda_paths()
+
 import torch
 import pynvml
 import av
