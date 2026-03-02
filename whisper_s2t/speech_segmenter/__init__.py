@@ -7,6 +7,7 @@ from ..audio import load_audio
 class VADBaseClass(ABC):
     def __init__(self, sampling_rate=16000):
         self.sampling_rate = sampling_rate
+        self.frame_size = None
 
     @abstractmethod
     def update_params(self, params=None):
@@ -20,7 +21,7 @@ class VADBaseClass(ABC):
 class SpeechSegmenter:
     def __init__(self, vad_model=None,
                  device=None,
-                 frame_size=0.02,
+                 frame_size=None,
                  min_seg_len=0.08,
                  max_seg_len=29.0,
                  max_silent_region=0.6,
@@ -36,9 +37,13 @@ class SpeechSegmenter:
 
         self.vad_model = vad_model
 
+        if frame_size is None:
+            self.frame_size = getattr(vad_model, 'frame_size', 0.02)
+        else:
+            self.frame_size = frame_size
+
         self.sampling_rate = sampling_rate
         self.padding = padding
-        self.frame_size = frame_size
         self.min_seg_len = min_seg_len
         self.max_seg_len = max_seg_len
         self.max_silent_region = max_silent_region
@@ -129,9 +134,9 @@ class SpeechSegmenter:
         start_ends = self.get_speech_segments(speech_probs)
 
         if len(start_ends) == 0:
-            start_ends = [[0.0, self.max_seg_len]] # Quick fix for silent audio.
+            start_ends = [[0.0, self.max_seg_len]]
 
-        start_ends[0][0] = max(0.0, start_ends[0][0]) # fix edges
-        start_ends[-1][1] = min(audio_duration, start_ends[-1][1]) # fix edges
+        start_ends[0][0] = max(0.0, start_ends[0][0])
+        start_ends[-1][1] = min(audio_duration, start_ends[-1][1])
 
         return start_ends, audio_signal

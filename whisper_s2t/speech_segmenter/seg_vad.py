@@ -15,6 +15,7 @@ class SegmentVAD(VADBaseClass):
                  sampling_rate=16000):
 
         super().__init__(sampling_rate=sampling_rate)
+        self.frame_size = win_step
 
         if device == None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'

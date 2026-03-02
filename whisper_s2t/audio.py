@@ -15,27 +15,22 @@ from .configs import *
 
 silent_file = f"{BASE_PATH}/assets/silent.mp3"
 
-RESAMPLING_ENGINE = 'soxr'
-with tempfile.TemporaryDirectory() as tmpdir:
-    ffmpeg_install_link = "https://github.com/shashikg/WhisperS2T?tab=readme-ov-file#for-ubuntu"
+# --- Audio backend detection ---
+# Priority: system ffmpeg in PATH > PyAV > error with install guidance
 
-    try: 
-        subprocess.check_output(['ffmpeg', '-version'])
-    except FileNotFoundError:
-        raise RuntimeError(f"Seems 'ffmpeg' is not installed. Please install ffmpeg before using this package!\nCheck: {ffmpeg_install_link}")
+AUDIO_BACKEND = None  # 'ffmpeg' or 'pyav'
+RESAMPLING_ENGINE = None
 
-    result = subprocess.run(
-        ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
-         '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
-         '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', '1600',
-         f'{tmpdir}/tmp.wav', '-y'],
-        capture_output=True
-    )
+def _probe_ffmpeg():
+    """Check if system ffmpeg is available and determine resampler."""
+    global RESAMPLING_ENGINE
+    try:
+        subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.DEVNULL)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return False
 
-    if result.returncode != 0:
-        print(f"'ffmpeg' failed with soxr resampler, trying 'swr' resampler.")
-        RESAMPLING_ENGINE = 'swr'
-
+    RESAMPLING_ENGINE = 'swr'
+    with tempfile.TemporaryDirectory() as tmpdir:
         result = subprocess.run(
             ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
              '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
@@ -43,11 +38,67 @@ with tempfile.TemporaryDirectory() as tmpdir:
              f'{tmpdir}/tmp.wav', '-y'],
             capture_output=True
         )
-
         if result.returncode != 0:
-            raise RuntimeError(f"Seems 'ffmpeg' is not installed properly. Please uninstall and install it again.\nCheck: {ffmpeg_install_link}")
-        else:
-            print(f"Using 'swr' resampler. This may degrade performance.")
+            return False
+    return True
+
+def _probe_pyav():
+    """Check if PyAV is importable."""
+    try:
+        import av
+        return True
+    except ImportError:
+        return False
+
+if _probe_ffmpeg():
+    AUDIO_BACKEND = 'ffmpeg'
+    print("Audio backend: ffmpeg (system)")
+elif _probe_pyav():
+    AUDIO_BACKEND = 'pyav'
+    print("Audio backend: PyAV")
+else:
+    raise RuntimeError(
+        "No audio backend available. Install one of the following:\n"
+        "  1) ffmpeg: add to system PATH (https://ffmpeg.org/download.html)\n"
+        "  2) PyAV:   pip install av"
+    )
+
+
+def _load_audio_ffmpeg(input_file, sr=16000):
+    """Load and resample audio using system ffmpeg subprocess."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        wav_file = f"{tmpdir}/tmp.wav"
+        result = subprocess.run(
+            ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', input_file,
+             '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
+             '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', str(sr),
+             wav_file, '-y'],
+            capture_output=True
+        )
+        if result.returncode != 0:
+            raise RuntimeError("ffmpeg failed to resample the input audio file, make sure ffmpeg is compiled properly!")
+
+        with wave.open(wav_file, 'rb') as wf:
+            frames = wf.getnframes()
+            x = wf.readframes(int(frames))
+
+    return np.frombuffer(x, np.int16).flatten().astype(np.float32) / 32768.0
+
+
+def _load_audio_pyav(input_file, sr=16000):
+    """Load and resample audio using PyAV (libav)."""
+    import av
+
+    container = av.open(input_file)
+    resampler = av.AudioResampler(format='s16', layout='mono', rate=sr)
+
+    chunks = []
+    for frame in container.decode(audio=0):
+        for resampled in resampler.resample(frame):
+            chunks.append(resampled.to_ndarray().flatten())
+    container.close()
+
+    return np.concatenate(chunks).astype(np.float32) / 32768.0
 
 
 def load_audio(input_file, sr=16000, return_duration=False):
@@ -59,25 +110,14 @@ def load_audio(input_file, sr=16000, return_duration=False):
 
             frames = wf.getnframes()
             x = wf.readframes(int(frames))
+            audio_signal = np.frombuffer(x, np.int16).flatten().astype(np.float32) / 32768.0
     except:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            wav_file = f"{tmpdir}/tmp.wav"
-            result = subprocess.run(
-                ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', input_file,
-                 '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
-                 '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', str(sr),
-                 wav_file, '-y'],
-                capture_output=True
-            )
-            if result.returncode != 0:
-                raise RuntimeError("ffmpeg failed to resample the input audio file, make sure ffmpeg is compiled properly!")
+        if AUDIO_BACKEND == 'ffmpeg':
+            audio_signal = _load_audio_ffmpeg(input_file, sr)
+        else:
+            audio_signal = _load_audio_pyav(input_file, sr)
 
-            with wave.open(wav_file, 'rb') as wf:
-                frames = wf.getnframes()
-                x = wf.readframes(int(frames))
-
-    audio_signal = np.frombuffer(x, np.int16).flatten().astype(np.float32)/32768.0
-    audio_duration = len(audio_signal)/sr
+    audio_duration = len(audio_signal) / sr
 
     if return_duration:
         return audio_signal, audio_duration

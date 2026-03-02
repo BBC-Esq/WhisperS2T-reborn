@@ -16,6 +16,7 @@ class FrameVAD(VADBaseClass):
                  sampling_rate=16000):
 
         super().__init__(sampling_rate=sampling_rate)
+        self.frame_size = frame_size
 
         if device == None:
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
