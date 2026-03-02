@@ -10,7 +10,14 @@ Download the test audio used for all benchmarks:
 
 Place the file in this `benchmarks/` directory (or pass the path via `--audio`).
 
-## Dependencies
+## Setup
+
+Create a standard Python virtual environment (not conda) and activate it:
+
+```sh
+python -m venv .
+.\Scripts\activate
+```
 
 These benchmarks measure GPU VRAM usage and require a CUDA-enabled version of PyTorch.
 PyPI only ships CPU builds of torch by default, so install the CUDA 12.8 build explicitly:
@@ -19,18 +26,20 @@ PyPI only ships CPU builds of torch by default, so install the CUDA 12.8 build e
 pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
 ```
 
-Then install the NVIDIA CUDA libraries (pip-installable, no system CUDA toolkit required) and benchmark dependencies:
+Install the NVIDIA CUDA libraries (pip-installable, no system CUDA toolkit required):
 
 ```sh
-# NVIDIA CUDA libraries
 pip install nvidia-cuda-runtime-cu12==12.8.90 nvidia-cublas-cu12==12.8.4.1 nvidia-cudnn-cu12==9.10.2.21 nvidia-ml-py==13.580.82
+```
 
+Then install the benchmark dependencies for whichever script you want to run:
+
+```sh
 # For whisper-s2t-reborn benchmark
 pip install whisper-s2t-reborn av
 
 # For openai-whisper benchmark
 pip install openai-whisper av
-
 ```
 
 > The scripts include a `set_cuda_paths()` helper that automatically configures the pip-installed NVIDIA libraries on Windows, so no system-wide CUDA installation is needed.
