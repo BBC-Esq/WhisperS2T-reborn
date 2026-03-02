@@ -17,7 +17,7 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 def load_model(model_identifier="large-v3", **model_kwargs):
-    if model_identifier in ['large-v3', 'distil-large-v3']:
+    if model_identifier in ['large-v3', 'distil-large-v3', 'large-v3-turbo']:
         model_kwargs.setdefault('n_mels', 128)
 
     from .backends.ctranslate2.model import WhisperModelCT2
