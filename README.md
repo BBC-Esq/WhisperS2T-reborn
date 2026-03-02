@@ -80,6 +80,23 @@ To enable word-level timestamps, load the model with:
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
 
+## Benchmarks
+
+**Model:** Whisper `large-v3` · FP16 · CUDA · RTX 4090
+**Audio:** [`sam_altman_lex_podcast_367.flac`](https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac)
+
+Comparing [`openai-whisper`](https://pypi.org/project/openai-whisper/) (no batch support) against [`whisper-s2t-reborn`](https://pypi.org/project/whisper-s2t-reborn/).
+
+| Backend | Batch Size | Time (s) | Speedup | Inference VRAM (MB) |
+|:---|:---:|---:|:---:|---:|
+| openai-whisper | — | 508.5 | 1.0× | 362 |
+| whisper-s2t-reborn | 1 | 372.4 | 1.4× | 560 |
+| whisper-s2t-reborn | 2 | 239.6 | 2.1× | 840 |
+| whisper-s2t-reborn | 4 | 145.5 | 3.5× | 1,387 |
+| whisper-s2t-reborn | 8 | 95.5 | 5.3× | 2,427 |
+| whisper-s2t-reborn | 16 | 69.4 | 7.3× | 4,608 |
+| whisper-s2t-reborn | 32 | 57.1 | 8.9× | 8,964 |
+
 ## Acknowledgements
 - [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
 - [**OpenAI Whisper Team**](https://github.com/openai/whisper): Thanks to the OpenAI Whisper Team for open-sourcing the Whisper model.
