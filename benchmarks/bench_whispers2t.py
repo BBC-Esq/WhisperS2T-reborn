@@ -86,9 +86,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark whisper-s2t-reborn on an audio file.")
     parser.add_argument("--audio", default=DEFAULTS["audio"], help="Path to input audio file.")
     parser.add_argument("--model", default=DEFAULTS["model"], help="Model identifier or path.")
-    parser.add_argument("--compute-type", default=DEFAULTS["compute_type"], help="Compute type (float16, float32, int8, etc.).")
+    parser.add_argument("--compute-type", default=DEFAULTS["compute_type"], help="Compute type (float16, float32, bfloat16).")
     parser.add_argument("--beam-size", type=int, default=DEFAULTS["beam_size"], help="Beam size for decoding.")
-    parser.add_argument("--batch-size", type=int, default=DEFAULTS["batch_size"], help="Batch size for VAD transcription.")
+    parser.add_argument("--batch-size", type=int, default=DEFAULTS["batch_size"], help="GPU batch size for transcription.")
     parser.add_argument("--language", default=DEFAULTS["language"], help="Language code.")
     parser.add_argument("--tokenizer", default=DEFAULTS["tokenizer"], help="Tokenizer path for tokens/sec calculation (optional).")
     parser.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu"],

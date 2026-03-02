@@ -30,6 +30,7 @@ pip install whisper-s2t-reborn av
 
 # For openai-whisper benchmark
 pip install openai-whisper av
+
 ```
 
 > The scripts include a `set_cuda_paths()` helper that automatically configures the pip-installed NVIDIA libraries on Windows, so no system-wide CUDA installation is needed.
@@ -69,9 +70,9 @@ python bench_whisper_vanilla.py --audio sam_altman_lex_podcast_367.flac
 |---|---|---|
 | `--audio` | `sam_altman_lex_podcast_367.flac` | Path to input audio file |
 | `--model` | `large-v3` | Model identifier (e.g. `large-v3`, `large-v3-turbo`, `distil-large-v3`) |
-| `--compute-type` | `float16` | Compute type (`float16`, `float32`, `int8`, etc.) |
+| `--compute-type` | `float16` | Compute type (`float16`, `float32`, `bfloat16`) |
 | `--beam-size` | `1` | Beam size for decoding |
-| `--batch-size` | `1` | Batch size for VAD transcription |
+| `--batch-size` | `1` | GPU batch size for transcription |
 | `--language` | `en` | Language code |
 | `--device` | `auto` | Device for inference (`auto`, `cuda`, `cpu`) |
 | `--word-timestamps` | off | Enable word-level timestamps |
