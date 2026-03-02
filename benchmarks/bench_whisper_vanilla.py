@@ -2,7 +2,8 @@
 Benchmark script for OpenAI Whisper (vanilla/original implementation).
 Note: This backend does not support batching.
 
-Required:  pip install openai-whisper av nvidia-ml-py
+Required:  pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu124
+           pip install openai-whisper av nvidia-ml-py
 
 Audio used for README benchmarks:
   https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac

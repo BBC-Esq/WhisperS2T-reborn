@@ -1,7 +1,8 @@
 """
 Benchmark script for whisper-s2t-reborn (CTranslate2-based Whisper inference with built-in VAD).
 
-Required:  pip install whisper-s2t-reborn av nvidia-ml-py
+Required:  pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu124
+           pip install whisper-s2t-reborn av nvidia-ml-py
 
 Audio used for README benchmarks:
   https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac

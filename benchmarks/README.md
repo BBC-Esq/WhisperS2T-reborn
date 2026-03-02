@@ -12,7 +12,16 @@ Place the file in this `benchmarks/` directory (or pass the path via `--audio`).
 
 ## Dependencies
 
-Each script has its own set of dependencies. Install only what you need:
+These benchmarks measure GPU VRAM usage and require a CUDA-enabled version of PyTorch.
+Install it **first** — PyPI only ships CPU builds by default:
+
+```sh
+pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu124
+```
+
+> Replace `cu124` with `cu118` or `cu126` to match your CUDA toolkit version.
+
+Then install the benchmark dependencies:
 
 ```sh
 # For whisper-s2t-reborn benchmark
