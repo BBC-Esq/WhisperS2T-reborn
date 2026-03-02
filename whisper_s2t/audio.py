@@ -29,7 +29,7 @@ def _probe_ffmpeg():
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
 
-    RESAMPLING_ENGINE = 'soxr'
+    RESAMPLING_ENGINE = 'swr'
     with tempfile.TemporaryDirectory() as tmpdir:
         result = subprocess.run(
             ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
@@ -39,19 +39,7 @@ def _probe_ffmpeg():
             capture_output=True
         )
         if result.returncode != 0:
-            print("'ffmpeg' failed with soxr resampler, trying 'swr' resampler.")
-            RESAMPLING_ENGINE = 'swr'
-            result = subprocess.run(
-                ['ffmpeg', '-hide_banner', '-loglevel', 'panic', '-i', silent_file,
-                 '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
-                 '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', '1600',
-                 f'{tmpdir}/tmp.wav', '-y'],
-                capture_output=True
-            )
-            if result.returncode != 0:
-                return False
-            else:
-                print("Using 'swr' resampler. This may degrade performance.")
+            return False
     return True
 
 def _probe_pyav():
