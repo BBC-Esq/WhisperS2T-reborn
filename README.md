@@ -1,11 +1,14 @@
 <h1 align="center"> WhisperS2T-Reborn ⚡ </h1>
 <p align="center"><b>An Optimized Speech-to-Text Pipeline for the Whisper Model Using CTranslate2</b></p>
+<br>
 
 WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashikg/WhisperS2T), an optimized lightning-fast **Speech-to-Text** (ASR) pipeline. It is tailored for the Whisper model using the CTranslate2 backend to provide faster transcription. It includes several heuristics to enhance transcription accuracy.
 
 [**Whisper**](https://github.com/openai/whisper) is a general-purpose speech recognition model developed by OpenAI. It is trained on a large dataset of diverse audio and is also a multitasking model that can perform multilingual speech recognition, speech translation, and language identification.
 
-## Installation
+## Getting Started
+
+### Installation
 
 You must install FFMPEG on your system first.
 
@@ -15,7 +18,7 @@ Install or update to the latest released version of WhisperS2T-Reborn:
 pip install -U whisper-s2t-reborn
 ```
 
-## Quick Start
+### Quick Start
 
 #### Transcribe a single file
 
