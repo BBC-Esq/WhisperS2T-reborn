@@ -89,13 +89,15 @@ Comparing [`openai-whisper`](https://pypi.org/project/openai-whisper/) (no batch
 
 | Backend | Batch Size | Time (s) | Speedup | Inference VRAM (MB) |
 |:---|:---:|---:|:---:|---:|
-| openai-whisper | — | 508.5 | 1.0× | 362 |
+| openai-whisper | 1 | 508.5 | 1.0× | 362 |
 | whisper-s2t-reborn | 1 | 372.4 | 1.4× | 560 |
 | whisper-s2t-reborn | 2 | 239.6 | 2.1× | 840 |
 | whisper-s2t-reborn | 4 | 145.5 | 3.5× | 1,387 |
 | whisper-s2t-reborn | 8 | 95.5 | 5.3× | 2,427 |
 | whisper-s2t-reborn | 16 | 69.4 | 7.3× | 4,608 |
 | whisper-s2t-reborn | 32 | 57.1 | 8.9× | 8,964 |
+> The increased VRAM usage even at batch size 1 is largely due to the VAD model.  Openai's implementation doesn't use voice activity detection.
+> The ```benchmarks``` folder has the actual scripts used.
 
 ## Acknowledgements
 - [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
