@@ -23,6 +23,11 @@ dependencies = [
     "tqdm",
 ]
 
+[project.optional-dependencies]
+pyav = [
+    "av>=13.0.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/BBC-Esq/WhisperS2T-reborn"
 
