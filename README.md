@@ -100,6 +100,7 @@ Comparing [`openai-whisper`](https://pypi.org/project/openai-whisper/) (no batch
 | whisper-s2t-reborn | 8 | 95.5 | 5.3× | 2,427 |
 | whisper-s2t-reborn | 16 | 69.4 | 7.3× | 4,608 |
 | whisper-s2t-reborn | 32 | 57.1 | 8.9× | 8,964 |
+| whisper-s2t-reborn | 64 | 49.8 | 10.2× | 17,665.75 |
 > The increased VRAM usage even at batch size 1 is largely due to the VAD model.  Openai's implementation doesn't use voice activity detection.
 > The ```benchmarks``` folder has the actual scripts used.
 
