@@ -103,6 +103,12 @@ Comparing [`openai-whisper`](https://pypi.org/project/openai-whisper/) (no batch
 > The increased VRAM usage even at batch size 1 is largely due to the VAD model.  Openai's implementation doesn't use voice activity detection.
 > The ```benchmarks``` folder has the actual scripts used.
 
+<details><summary>VISUAL OF BENCHMARK RESULTS</summary>
+
+<img width="925" height="980" alt="image" src="https://github.com/user-attachments/assets/4d8afafe-f218-4cf8-8c21-510540c22980" />
+
+</details>
+
 ## Acknowledgements
 - [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
 - [**OpenAI Whisper Team**](https://github.com/openai/whisper): Thanks to the OpenAI Whisper Team for open-sourcing the Whisper model.
