@@ -57,6 +57,11 @@ _MODELS = {
         "float16": "ctranslate2-4you/whisper-large-v3-ct2-float16",
         "bfloat16": "ctranslate2-4you/whisper-large-v3-ct2-bfloat16",
     },
+    "large-v3-turbo": {
+        "float32": "ctranslate2-4you/whisper-large-v3-turbo-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-large-v3-turbo-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-large-v3-turbo-ct2-bfloat16",
+    },
     "distil-small.en": {
         "float32": "ctranslate2-4you/distil-whisper-small.en-ct2-float32",
         "float16": "ctranslate2-4you/distil-whisper-small.en-ct2-float16",
