@@ -84,6 +84,23 @@ To enable word-level timestamps, load the model with:
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
 
+## Supported Models
+
+| Model | Identifier |
+|:---|:---|
+| Tiny | `tiny` / `tiny.en` |
+| Base | `base` / `base.en` |
+| Small | `small` / `small.en` |
+| Medium | `medium` / `medium.en` |
+| Large V3 | `large-v3` |
+| Large V3 Turbo | `large-v3-turbo` |
+| Distil Small | `distil-small.en` |
+| Distil Medium | `distil-medium.en` |
+| Distil Large V3 | `distil-large-v3` |
+| Distil Large V3.5 | `distil-large-v3.5` |
+
+All models are available in `float16`, `float32`, and `bfloat16` compute types via [CTranslate2-4you](https://huggingface.co/ctranslate2-4you) on Hugging Face.
+
 ## Benchmarks
 
 **Model:** Whisper `large-v3` · FP16 · CUDA · RTX 4090

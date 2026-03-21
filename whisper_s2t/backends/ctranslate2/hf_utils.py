@@ -77,6 +77,11 @@ _MODELS = {
         "float16": "ctranslate2-4you/distil-whisper-large-v3-ct2-float16",
         "bfloat16": "ctranslate2-4you/distil-whisper-large-v3-ct2-bfloat16",
     },
+    "distil-large-v3.5": {
+        "float32": "ctranslate2-4you/whisper-distil-large-v3.5-ct2-float32",
+        "float16": "ctranslate2-4you/whisper-distil-large-v3.5-ct2-float16",
+        "bfloat16": "ctranslate2-4you/whisper-distil-large-v3.5-ct2-bfloat16",
+    },
 }
 
 _MODELS["large"] = _MODELS["large-v3"]
