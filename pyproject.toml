@@ -21,10 +21,6 @@ dependencies = [
     "tokenizers",
     "torch>=2.8.0,<3.0.0",
     "tqdm",
-]
-
-[project.optional-dependencies]
-pyav = [
     "av>=13.0.0",
 ]
 
