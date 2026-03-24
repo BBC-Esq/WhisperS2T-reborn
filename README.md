@@ -7,14 +7,6 @@ WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashi
 
 ## Installation
 
-**Recommended** — install with PyAV for built-in audio decoding (no system dependencies required):
-
-```sh
-pip install -U whisper-s2t-reborn[pyav]
-```
-
-Alternatively, if you have ffmpeg [correctly installed](https://www.hostinger.com/tutorials/how-to-install-ffmpeg) and available in your system PATH:
-
 ```sh
 pip install -U whisper-s2t-reborn
 ```
