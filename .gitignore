@@ -3,6 +3,7 @@ Lib/
 Scripts/
 Include/
 pyvenv.cfg
+.venv/
 
 # Python
 __pycache__/
@@ -16,6 +17,7 @@ build/
 compiled_files.txt
 settings.yaml
 splash.png
+local_tests/
 
 # IDE
 .vscode/

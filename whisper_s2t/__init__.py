@@ -17,8 +17,8 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 def load_model(model_identifier="large-v3", **model_kwargs):
-    if model_identifier in ['large-v3', 'distil-large-v3', 'large-v3-turbo']:
-        model_kwargs.setdefault('n_mels', 128)
-
+    # n_mels is no longer inferred from the model name here. The CTranslate2
+    # backend derives it from the loaded model itself (model.n_mels), which is
+    # authoritative and works for every identifier, alias, and custom HF repo.
     from .backends.ctranslate2.model import WhisperModelCT2
     return WhisperModelCT2(model_identifier, **model_kwargs)

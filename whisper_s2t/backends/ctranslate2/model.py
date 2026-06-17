@@ -92,6 +92,13 @@ class WhisperModelCT2(WhisperModel):
                                                 intra_threads=cpu_threads,
                                                 inter_threads=num_workers)
 
+        # The number of mel bins is an architectural property of the encoder
+        # (80 for most models, 128 for large-v3 and its derivatives). Derive it
+        # from the loaded model rather than guessing from the identifier so that
+        # aliases (e.g. "large"), newer models (e.g. "distil-large-v3.5"), and
+        # custom HF repos all get the correct value.
+        model_kwargs['n_mels'] = self.model.n_mels
+
         tokenizer_file = os.path.join(self.model_path, "tokenizer.json")
         tokenizer = Tokenizer(tokenizers.Tokenizer.from_file(tokenizer_file), self.model.is_multilingual)
 
