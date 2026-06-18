@@ -149,8 +149,12 @@ class WhisperModelCT2(WhisperModel):
             self.update_params(params={'max_text_token_len': params['max_text_token_len']})
 
     def encode(self, features):
-        features = ctranslate2.StorageView.from_array(features.contiguous())
-        return self.model.encode(features)
+        if self.device == 'cpu':
+            features = np.ascontiguousarray(features.detach().numpy())
+        else:
+            features = features.contiguous()
+
+        return self.model.encode(ctranslate2.StorageView.from_array(features))
 
     def assign_word_timings(self, alignments, text_token_probs, words, word_tokens):
         text_indices = np.array([pair[0] for pair in alignments])
