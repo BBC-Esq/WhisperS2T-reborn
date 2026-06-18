@@ -1,4 +1,5 @@
 import os
+import warnings
 import tokenizers
 import ctranslate2
 import numpy as np
@@ -108,13 +109,24 @@ class WhisperModelCT2(WhisperModel):
         self.asr_options.update(asr_options)
 
         if self.asr_options['word_timestamps']:
-            self.aligner_model_path = download_model(self.asr_options['word_aligner_model'], compute_type=compute_type)
+            aligner_name = self.asr_options['word_aligner_model']
+            if (not self.model.is_multilingual) and aligner_name == 'tiny':
+                aligner_name = 'tiny.en'
+
+            self.aligner_model_path = download_model(aligner_name, compute_type=compute_type)
             self.aligner_model = ctranslate2.models.Whisper(self.aligner_model_path,
                                                             device=device,
                                                             device_index=device_index,
                                                             compute_type=compute_type,
                                                             intra_threads=cpu_threads,
                                                             inter_threads=num_workers)
+
+            if self.aligner_model.is_multilingual != self.model.is_multilingual:
+                warnings.warn(
+                    f"word_aligner_model '{aligner_name}' (multilingual={self.aligner_model.is_multilingual}) "
+                    f"does not match the main model (multilingual={self.model.is_multilingual}); "
+                    f"word timestamps may be inaccurate due to a tokenizer mismatch."
+                )
 
         self.generate_kwargs = {
             "max_length": max_text_token_len,
@@ -258,7 +270,8 @@ class WhisperModelCT2(WhisperModel):
 
         if self.asr_options['word_timestamps']:
             text_tokens = [x.sequences_ids[0]+[self.tokenizer.eot] for x in result]
-            sot_seqs = [tuple(_[-4:]) for _ in prompts]
+            sot_len = 4 if self.tokenizer.multilingual else 2
+            sot_seqs = [tuple(_[-sot_len:]) for _ in prompts]
             word_timings = self.align_words(features, texts, text_tokens, sot_seqs, seq_lens, seg_metadata)
 
             for _response, _word_timings in zip(response, word_timings):
