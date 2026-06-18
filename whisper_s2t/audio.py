@@ -96,7 +96,14 @@ def _load_audio_pyav(input_file, sr=16000):
     for frame in container.decode(audio=0):
         for resampled in resampler.resample(frame):
             chunks.append(resampled.to_ndarray().flatten())
+
+    for resampled in resampler.resample(None):
+        chunks.append(resampled.to_ndarray().flatten())
+
     container.close()
+
+    if not chunks:
+        return np.zeros(0, dtype=np.float32)
 
     return np.concatenate(chunks).astype(np.float32) / 32768.0
 
