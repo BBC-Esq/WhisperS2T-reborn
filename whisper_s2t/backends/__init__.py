@@ -25,7 +25,7 @@ class NoneTokenizer:
 def fix_batch_param(param, default_value, N):
     if param is None:
         param = N*[default_value]
-    elif isinstance(param, type(default_value)):
+    elif isinstance(param, str):
         param = N*[param]
     elif len(param) != N:
         param = N*[param[0]]
