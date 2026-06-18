@@ -135,6 +135,12 @@ def convert_to_wav(audio_file):
                 for packet in output_stream.encode(resampled_frame):
                     output_container.mux(packet)
 
+    final_frames = resampler.resample(None)
+    if final_frames is not None:
+        for resampled_frame in final_frames:
+            for packet in output_stream.encode(resampled_frame):
+                output_container.mux(packet)
+
     for packet in output_stream.encode(None):
         output_container.mux(packet)
 
