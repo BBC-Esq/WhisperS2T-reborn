@@ -31,6 +31,9 @@ class SpeechSegmenter:
                  cut_factor=2,
                  sampling_rate=16000):
 
+        if cut_factor < 1:
+            raise ValueError(f"cut_factor must be >= 1, got {cut_factor}")
+
         if vad_model is None:
             from .frame_vad import FrameVAD
             vad_model = FrameVAD(device=device)
@@ -114,7 +117,10 @@ class SpeechSegmenter:
                 _start_idx = int(start_idx + self.cut_idx)
                 _end_idx = int(min(end_idx, start_idx + self.max_idx_in_seg))
 
-                new_end_idx = _start_idx+np.argmin(speech_probs[_start_idx:_end_idx, 0])
+                if _end_idx > _start_idx:
+                    new_end_idx = _start_idx+np.argmin(speech_probs[_start_idx:_end_idx, 0])
+                else:
+                    new_end_idx = _start_idx
                 start_ends.append([speech_probs[start_idx][1], speech_probs[new_end_idx][2]])
                 start_idx = new_end_idx+1
 
