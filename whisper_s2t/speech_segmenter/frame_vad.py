@@ -104,6 +104,9 @@ class FrameVAD(VADBaseClass):
     def __call__(self, audio_signal):
         audio_duration = len(audio_signal)/self.sampling_rate
 
+        if len(audio_signal) == 0:
+            return np.empty((0, 3))
+
         input_signal, input_signal_length = self.prepare_input_batch(audio_signal)
         speech_probs = self.forward(input_signal, input_signal_length)
 
