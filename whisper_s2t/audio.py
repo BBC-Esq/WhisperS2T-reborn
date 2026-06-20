@@ -15,6 +15,8 @@ from .configs import *
 
 silent_file = f"{BASE_PATH}/assets/silent.mp3"
 
+_SUBPROCESS_FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+
 # --- Audio backend detection ---
 # Priority: system ffmpeg in PATH > PyAV > error with install guidance
 
@@ -25,7 +27,7 @@ def _probe_ffmpeg():
     """Check if system ffmpeg is available and determine resampler."""
     global RESAMPLING_ENGINE
     try:
-        subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.DEVNULL)
+        subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.DEVNULL, creationflags=_SUBPROCESS_FLAGS)
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
 
@@ -36,7 +38,8 @@ def _probe_ffmpeg():
              '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
              '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', '1600',
              f'{tmpdir}/tmp.wav', '-y'],
-            capture_output=True
+            capture_output=True,
+            creationflags=_SUBPROCESS_FLAGS
         )
         if result.returncode != 0:
             return False
@@ -73,7 +76,8 @@ def _load_audio_ffmpeg(input_file, sr=16000):
              '-threads', '1', '-acodec', 'pcm_s16le', '-ac', '1',
              '-af', f'aresample=resampler={RESAMPLING_ENGINE}', '-ar', str(sr),
              wav_file, '-y'],
-            capture_output=True
+            capture_output=True,
+            creationflags=_SUBPROCESS_FLAGS
         )
         if result.returncode != 0:
             raise RuntimeError("ffmpeg failed to resample the input audio file, make sure ffmpeg is compiled properly!")
