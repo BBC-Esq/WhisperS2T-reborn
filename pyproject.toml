@@ -13,7 +13,7 @@ authors = [
     {name = "Blair Chintella"}
 ]
 dependencies = [
-    "ctranslate2==4.6.2",
+    "ctranslate2>=4.6.2,<5.0.0",
     "huggingface-hub",
     "numpy>=1.26.4,<3.0.0",
     "platformdirs",
