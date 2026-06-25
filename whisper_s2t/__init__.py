@@ -6,7 +6,7 @@ from .utils import write_outputs
 try:
     __version__ = version("whisper-s2t-reborn")
 except PackageNotFoundError:
-    __version__ = "1.6.2"
+    __version__ = "1.6.3"
 
 __all__ = ["load_model", "write_outputs", "CACHE_DIR", "BASE_PATH", "__version__"]
 
