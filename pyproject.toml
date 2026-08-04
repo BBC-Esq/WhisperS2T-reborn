@@ -8,7 +8,7 @@ version = "1.6.3"
 description = "A streamlined Speech-to-Text pipeline for Whisper using CTranslate2"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.15"
 authors = [
     {name = "Blair Chintella"}
 ]
