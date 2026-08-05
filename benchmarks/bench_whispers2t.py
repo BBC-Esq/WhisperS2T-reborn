@@ -1,19 +1,19 @@
 """
 Benchmark script for whisper-s2t-reborn (CTranslate2-based Whisper inference with built-in VAD).
 
-Setup:
+Setup (matches the published README numbers):
   python -m venv .
   .\\Scripts\\activate
-  pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
+  pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
   pip install whisper-s2t-reborn av
-  pip install nvidia-cuda-runtime-cu12==12.8.90 nvidia-cublas-cu12==12.8.4.1 nvidia-cudnn-cu12==9.10.2.21 nvidia-ml-py==13.580.82
+  pip install nvidia-cuda-runtime-cu12==12.8.90 nvidia-cublas-cu12==12.8.4.1 nvidia-ml-py
 
 Audio used for README benchmarks:
   https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac
 
 Usage:
   python bench_whispers2t.py --audio path/to/audio.flac
-  python bench_whispers2t.py --audio path/to/audio.flac --batch-size 32
+  python bench_whispers2t.py --audio sam_altman_lex_podcast_367.flac --model distil-large-v3 --batch-size 32
   python bench_whispers2t.py --audio path/to/audio.flac --model large-v3-turbo
 """
 import os
