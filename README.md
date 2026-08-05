@@ -112,29 +112,24 @@ All models are available in `float16`, `float32`, and `bfloat16` compute types v
 
 ## Benchmarks
 
-**Model:** Whisper `large-v3` · FP16 · CUDA · RTX 4090
-**Audio:** [`sam_altman_lex_podcast_367.flac`](https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac)
+**Model:** `distil-large-v3` · FP16 · CUDA · RTX 4090
+**Engine:** whisper-s2t-reborn 1.7.1 · CTranslate2 4.8.1 · torch 2.11.0+cu128
+**Audio:** [`sam_altman_lex_podcast_367.flac`](https://huggingface.co/datasets/reach-vb/random-audios/blob/main/sam_altman_lex_podcast_367.flac) (~2 h 9 min)
 
 Comparing [`openai-whisper`](https://pypi.org/project/openai-whisper/) (no batch support) against [`whisper-s2t-reborn`](https://pypi.org/project/whisper-s2t-reborn/).
 
 | Backend | Batch Size | Time (s) | Speedup | Inference VRAM (MB) |
 |:---|:---:|---:|:---:|---:|
-| openai-whisper | 1 | 508.5 | 1.0× | 362 |
-| whisper-s2t-reborn | 1 | 372.4 | 1.4× | 560 |
-| whisper-s2t-reborn | 2 | 239.6 | 2.1× | 840 |
-| whisper-s2t-reborn | 4 | 145.5 | 3.5× | 1,387 |
-| whisper-s2t-reborn | 8 | 95.5 | 5.3× | 2,427 |
-| whisper-s2t-reborn | 16 | 69.4 | 7.3× | 4,608 |
-| whisper-s2t-reborn | 32 | 57.1 | 8.9× | 8,964 |
-| whisper-s2t-reborn | 64 | 49.8 | 10.2× | 17,665.75 |
+| openai-whisper | 1 | 110.1 | 1.0× | 314 |
+| whisper-s2t-reborn | 1 | 65.5 | 1.7× | 393 |
+| whisper-s2t-reborn | 2 | 52.6 | 2.1× | 540 |
+| whisper-s2t-reborn | 4 | 40.7 | 2.7× | 869 |
+| whisper-s2t-reborn | 8 | 35.4 | 3.1× | 1,452 |
+| whisper-s2t-reborn | 16 | 32.6 | 3.4× | 2,762 |
+| whisper-s2t-reborn | 32 | 31.0 | 3.6× | 5,267 |
+| whisper-s2t-reborn | 64 | 30.2 | 3.6× | 10,304 |
 > The increased VRAM usage even at batch size 1 is largely due to the VAD model.  Openai's implementation doesn't use voice activity detection.
 > The ```benchmarks``` folder has the actual scripts used.
-
-<details><summary>VISUAL OF BENCHMARK RESULTS</summary>
-
-<img width="925" height="980" alt="image" src="https://github.com/user-attachments/assets/4d8afafe-f218-4cf8-8c21-510540c22980" />
-
-</details>
 
 ## Acknowledgements
 - [**Original WhisperS2T**](https://github.com/shashikg/WhisperS2T): Thanks to shashig for the original WhisperS2T project that this fork is based on.
