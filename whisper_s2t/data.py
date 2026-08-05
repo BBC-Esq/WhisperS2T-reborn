@@ -174,6 +174,13 @@ class WhisperDataLoader:
             new_segmented_audio_signal = self.get_segmented_audio_signal(start_ends, audio_signal, file_id, lang, task, initial_prompt)
             pbar_update_len[file_id] = 1/len(new_segmented_audio_signal)
 
+            if segmented_audio_signal and segmented_audio_signal[0][2] != new_segmented_audio_signal[0][2]:
+                signal_batch, prompt_batch, seq_len, seg_metadata = self.data_collate_fn(segmented_audio_signal)
+                pbar_update = int(sum([pbar_update_len[_['file_id']] for _ in seg_metadata])*100)
+                segmented_audio_signal = []
+
+                yield signal_batch, prompt_batch, seq_len, seg_metadata, pbar_update
+
             segmented_audio_signal = segmented_audio_signal + new_segmented_audio_signal
 
             while len(segmented_audio_signal) > batch_size:
@@ -199,6 +206,13 @@ class WhisperDataLoader:
             start_ends, audio_signal = self.basic_segmenter(audio_signal=audio_signal)
             new_segmented_audio_signal = self.get_segmented_audio_signal(start_ends, audio_signal, file_id, lang, task, initial_prompt)
             pbar_update_len[file_id] = 1/len(new_segmented_audio_signal)
+
+            if segmented_audio_signal and segmented_audio_signal[0][2] != new_segmented_audio_signal[0][2]:
+                signal_batch, prompt_batch, seq_len, seg_metadata = self.data_collate_fn(segmented_audio_signal)
+                pbar_update = int(sum([pbar_update_len[_['file_id']] for _ in seg_metadata])*100)
+                segmented_audio_signal = []
+
+                yield signal_batch, prompt_batch, seq_len, seg_metadata, pbar_update
 
             segmented_audio_signal = segmented_audio_signal + new_segmented_audio_signal
 
