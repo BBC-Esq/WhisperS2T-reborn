@@ -169,18 +169,21 @@ def _benchmark_worker(conn, model_size, compute_type, beam_size, language, audio
             time.sleep(0.1)
 
     if use_gpu:
-        poll_thread = threading.Thread(target=poll_vram)
+        poll_thread = threading.Thread(target=poll_vram, daemon=True)
         poll_thread.start()
 
     start = time.perf_counter()
-    fp16 = (compute_type == "float16") and use_gpu
-    result = model.transcribe(audio_file, language=language, beam_size=beam_size, without_timestamps=True, fp16=fp16, word_timestamps=word_timestamps)
-    transcription = result["text"]
-    elapsed = time.perf_counter() - start
+    try:
+        fp16 = (compute_type == "float16") and use_gpu
+        result = model.transcribe(audio_file, language=language, beam_size=beam_size, without_timestamps=True, fp16=fp16, word_timestamps=word_timestamps)
+        transcription = result["text"]
+        elapsed = time.perf_counter() - start
+    finally:
+        if use_gpu:
+            stop_event.set()
+            poll_thread.join()
 
     if use_gpu:
-        stop_event.set()
-        poll_thread.join()
         pynvml.nvmlShutdown()
 
     conn.send({
@@ -206,8 +209,21 @@ def run_benchmark(args):
               args.language, args.audio, args.word_timestamps, args.device),
     )
     process.start()
-    result = parent_conn.recv()
+    child_conn.close()
+    result = None
+    try:
+        while result is None:
+            if parent_conn.poll(1.0):
+                result = parent_conn.recv()
+            elif not process.is_alive():
+                if parent_conn.poll(0):
+                    result = parent_conn.recv()
+                break
+    except EOFError:
+        pass
     process.join()
+    if result is None:
+        sys.exit(f"Benchmark worker died before returning a result (exit code {process.exitcode}).")
 
     print_results(
         backend="openai-whisper",

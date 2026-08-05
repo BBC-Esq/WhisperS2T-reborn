@@ -221,34 +221,35 @@ def _benchmark_worker(conn, model_identifier, compute_type, beam_size, batch_siz
             time.sleep(0.1)
 
     if use_gpu:
-        poll_thread = threading.Thread(target=poll_vram)
+        poll_thread = threading.Thread(target=poll_vram, daemon=True)
         poll_thread.start()
 
     start = time.perf_counter()
 
     # Auto-convert non-WAV files (included in pipeline timing)
     converted = None
-    ext = Path(audio_file).suffix.lower()
-    if ext != ".wav":
-        converted = convert_to_wav(audio_file)
-        audio_to_use = converted
-    else:
-        audio_to_use = audio_file
+    try:
+        ext = Path(audio_file).suffix.lower()
+        if ext != ".wav":
+            converted = convert_to_wav(audio_file)
+            audio_to_use = converted
+        else:
+            audio_to_use = audio_file
 
-    with torch.inference_mode():
-        out = model.transcribe_with_vad(
-            [audio_to_use],
-            lang_codes=[language],
-            tasks=['transcribe'],
-            initial_prompts=[None],
-            batch_size=batch_size,
-        )
-        transcription = " ".join(seg['text'] for seg in out[0]).strip()
-    elapsed = time.perf_counter() - start
-
-    if use_gpu:
-        stop_event.set()
-        poll_thread.join()
+        with torch.inference_mode():
+            out = model.transcribe_with_vad(
+                [audio_to_use],
+                lang_codes=[language],
+                tasks=['transcribe'],
+                initial_prompts=[None],
+                batch_size=batch_size,
+            )
+            transcription = " ".join(seg['text'] for seg in out[0]).strip()
+        elapsed = time.perf_counter() - start
+    finally:
+        if use_gpu:
+            stop_event.set()
+            poll_thread.join()
 
     # Token counting (optional)
     tokens_per_second = None
@@ -295,8 +296,21 @@ def run_benchmark(args):
               args.word_timestamps, args.device),
     )
     process.start()
-    result = parent_conn.recv()
+    child_conn.close()
+    result = None
+    try:
+        while result is None:
+            if parent_conn.poll(1.0):
+                result = parent_conn.recv()
+            elif not process.is_alive():
+                if parent_conn.poll(0):
+                    result = parent_conn.recv()
+                break
+    except EOFError:
+        pass
     process.join()
+    if result is None:
+        sys.exit(f"Benchmark worker died before returning a result (exit code {process.exitcode}).")
 
     print_results(
         backend="whisper-s2t-reborn",
