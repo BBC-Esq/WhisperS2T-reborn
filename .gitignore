@@ -2,8 +2,12 @@
 Lib/
 Scripts/
 Include/
+share/
 pyvenv.cfg
 .venv/
+
+# Benchmark audio
+benchmarks/*.flac
 
 # Python
 __pycache__/
