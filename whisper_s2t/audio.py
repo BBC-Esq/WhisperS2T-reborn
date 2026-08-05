@@ -116,8 +116,8 @@ def load_audio(input_file, sr=16000, return_duration=False):
 
     try:
         with wave.open(input_file, 'rb') as wf:
-            if (wf.getframerate() != sr) or (wf.getnchannels() != 1):
-                raise Exception("Not a 16kHz wav mono channel file!")
+            if (wf.getframerate() != sr) or (wf.getnchannels() != 1) or (wf.getsampwidth() != 2):
+                raise Exception("Not a 16kHz 16-bit wav mono channel file!")
 
             frames = wf.getnframes()
             x = wf.readframes(int(frames))
