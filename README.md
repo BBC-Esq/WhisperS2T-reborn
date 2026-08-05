@@ -11,6 +11,15 @@ WhisperS2T-Reborn is a modernized fork of [WhisperS2T](https://github.com/shashi
 pip install -U whisper-s2t-reborn
 ```
 
+> [!NOTE]
+> `load_model()` defaults to `device="cuda"`, which requires an NVIDIA GPU with CUDA 12.x and a CUDA-enabled build of PyTorch. The default `torch` wheel from PyPI on Windows is CPU-only — install the CUDA build explicitly:
+>
+> ```sh
+> pip install torch --index-url https://download.pytorch.org/whl/cu128
+> ```
+>
+> No NVIDIA GPU? See [Running on CPU](#running-on-cpu).
+
 ## Quick Start
 
 #### Transcribe a single file
@@ -75,6 +84,14 @@ To enable word-level timestamps, load the model with:
 ```py
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
+
+#### Running on CPU
+
+```py
+model = whisper_s2t.load_model("large-v3", device="cpu", compute_type="float32")
+```
+
+Pass `compute_type="float32"` — CTranslate2 does not run float16 on CPU. Smaller models (`base`, `small`) are much more practical for CPU inference.
 
 ## Supported Models
 
