@@ -6,7 +6,7 @@ Setup:
   python -m venv .
   .\\Scripts\\activate
   pip install torch==2.9.0 --index-url https://download.pytorch.org/whl/cu128
-  pip install openai-whisper av
+  pip install openai-whisper av huggingface_hub
   pip install nvidia-cuda-runtime-cu12==12.8.90 nvidia-cublas-cu12==12.8.4.1 nvidia-cudnn-cu12==9.10.2.21 nvidia-ml-py==13.580.82
 
 Audio used for README benchmarks:
@@ -15,6 +15,10 @@ Audio used for README benchmarks:
 Usage:
   python bench_whisper_vanilla.py --audio path/to/audio.wav
   python bench_whisper_vanilla.py --audio path/to/audio.wav --model-size large-v3
+  python bench_whisper_vanilla.py --audio path/to/audio.wav --model-size distil-large-v3
+
+Distil-Whisper models are loaded from the OpenAI-format checkpoints published in
+the distil-whisper Hugging Face repos (same approach as docling PR #3741).
 """
 import os
 import sys
@@ -73,6 +77,13 @@ import pynvml
 import av
 import whisper
 
+DISTIL_OPENAI_CHECKPOINTS = {
+    "distil-small.en": ("distil-whisper/distil-small.en", "original-model.bin"),
+    "distil-medium.en": ("distil-whisper/distil-medium.en", "original-model.bin"),
+    "distil-large-v3": ("distil-whisper/distil-large-v3-openai", "model.bin"),
+    "distil-large-v3.5": ("distil-whisper/distil-large-v3.5-openai", "model.bin"),
+}
+
 # ── Hardcoded defaults (edit here for quick runs) ────────────────────────────
 DEFAULTS = {
     "audio": "sam_altman_lex_podcast_367.flac",
@@ -86,7 +97,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark OpenAI Whisper (vanilla) on an audio file.")
     parser.add_argument("--audio", default=DEFAULTS["audio"], help="Path to input audio file.")
     parser.add_argument("--model-size", default=DEFAULTS["model_size"],
-                        help="Whisper model size (tiny, base, small, medium, large, turbo).")
+                        help="Whisper model size (tiny, base, small, medium, large, turbo) "
+                             "or a Distil-Whisper model (distil-small.en, distil-medium.en, "
+                             "distil-large-v3, distil-large-v3.5).")
     parser.add_argument("--beam-size", type=int, default=DEFAULTS["beam_size"], help="Beam size for decoding.")
     parser.add_argument("--compute-type", default=DEFAULTS["compute_type"],
                         choices=["float16", "float32"],
@@ -150,7 +163,14 @@ def _benchmark_worker(conn, model_size, compute_type, beam_size, language, audio
     else:
         baseline_vram = 0.0
 
-    model = whisper.load_model(model_size, device=device)
+    if model_size in DISTIL_OPENAI_CHECKPOINTS:
+        from huggingface_hub import hf_hub_download
+        repo_id, filename = DISTIL_OPENAI_CHECKPOINTS[model_size]
+        load_target = hf_hub_download(repo_id=repo_id, filename=filename)
+    else:
+        load_target = model_size
+
+    model = whisper.load_model(load_target, device=device)
 
     if use_gpu:
         after_load_vram = pynvml.nvmlDeviceGetMemoryInfo(handle).used / 1024**2
