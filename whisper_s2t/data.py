@@ -71,6 +71,10 @@ class BasicSegmenter:
 
         start_ends[-1][1] = min(audio_duration, start_ends[-1][1])
 
+        if len(start_ends) > 1 and (start_ends[-1][1] - start_ends[-1][0]) < min(1.0, CHUNK_LENGTH - self.max_seg_len):
+            start_ends[-2][1] = start_ends[-1][1]
+            start_ends.pop()
+
         return start_ends, audio_signal
 
 
