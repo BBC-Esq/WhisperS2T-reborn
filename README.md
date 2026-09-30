@@ -12,7 +12,7 @@ pip install -U whisper-s2t-reborn
 ```
 
 > [!NOTE]
-> `load_model()` defaults to `device="cuda"`, which requires an NVIDIA GPU with CUDA 12.x and a CUDA-enabled build of PyTorch. The default `torch` wheel from PyPI on Windows is CPU-only — install the CUDA build explicitly:
+> `load_model()` defaults to `device="cuda"`, which requires an NVIDIA GPU (driver 572.61+ on Windows, 570.124.06+ on Linux) and a **CUDA 12** build of PyTorch. CTranslate2 relies on the CUDA 12 libraries that PyTorch installs, so CUDA 13 builds won't work. The default `torch` wheel from PyPI is CPU-only on Windows and built for CUDA 13 on Linux — install the CUDA 12.8 build explicitly:
 >
 > ```sh
 > pip install torch --index-url https://download.pytorch.org/whl/cu128
