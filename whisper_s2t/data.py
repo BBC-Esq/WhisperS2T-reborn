@@ -63,8 +63,8 @@ class BasicSegmenter:
             audio_duration = len(audio_signal)/self.sampling_rate
 
         start_ends = []
-        for i in range(0, math.ceil(audio_duration), int(self.max_seg_len)):
-            start_ends.append([i, i + self.max_seg_len])
+        for i in range(math.ceil(audio_duration/self.max_seg_len)):
+            start_ends.append([i*self.max_seg_len, (i + 1)*self.max_seg_len])
 
         if len(start_ends) == 0:
             start_ends = [[0.0, self.max_seg_len]]
