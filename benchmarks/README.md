@@ -23,7 +23,7 @@ python -m venv .
 ```
 
 These benchmarks measure GPU VRAM usage and require a CUDA-enabled version of PyTorch.
-PyPI only ships CPU builds of torch by default, so install the CUDA 12.8 build explicitly:
+PyPI's default torch wheel is CPU-only on Windows and built for CUDA 13 on Linux, so install the CUDA 12.8 build explicitly:
 
 ```sh
 pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
@@ -49,7 +49,7 @@ pip install openai-whisper av huggingface_hub
 >
 > `nvidia-ml-py` is imported as `pynvml` in Python. It provides GPU VRAM monitoring via NVML.
 >
-> cuDNN does not need to be installed: CTranslate2 4.6.3+ uses a pure-CUDA `Conv1d` and ships without cuDNN, and torch's CUDA wheels bundle their own copy for the VAD models.
+> cuDNN does not need to be installed: CTranslate2 4.6.3+ doesn't use it (its `Conv1d` is pure CUDA), and torch's CUDA wheels bundle their own copy for the VAD models.
 
 ## Running
 
