@@ -179,6 +179,9 @@ class WhisperModelCT2(WhisperModel):
         return self.model.encode(ctranslate2.StorageView.from_array(features))
 
     def assign_word_timings(self, alignments, text_token_probs, words, word_tokens):
+        if len(alignments) == 0:
+            return []
+
         text_indices = np.array([pair[0] for pair in alignments])
         time_indices = np.array([pair[1] for pair in alignments])
 
