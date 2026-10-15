@@ -85,7 +85,7 @@ To enable word-level timestamps, load the model with:
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
 
-Word timestamps use a small aligner model (`tiny`, or `tiny.en` for English-only models) that is downloaded along with the main model. The large-v3 family (`large-v3`, `large-v3-turbo`, `distil-large-v3`, `distil-large-v3.5`) aligns with itself instead. `whisper_s2t.default_word_aligner(name)` tells you which one a model uses (`None` when it aligns with itself).
+Word timestamps use a small aligner model (`tiny`, or `tiny.en` for English-only models), which is downloaded when you load a model with word timestamps on. The large-v3 family (`large-v3`, `large-v3-turbo`, `distil-large-v3`, `distil-large-v3.5`) aligns with itself instead. `whisper_s2t.default_word_aligner(name)` tells you which one a model uses (`None` when it aligns with itself).
 
 #### Running on CPU
 
