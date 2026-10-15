@@ -71,6 +71,10 @@ class WhisperModelCT2(WhisperModel):
 
         compute_type = _normalize_compute_type(compute_type)
 
+        for key in ('use_dynamic_time_axis', 'dta_padding'):
+            if model_kwargs.pop(key, None) is not None:
+                warnings.warn(f"'{key}' is no longer supported and is ignored.")
+
         if os.path.isdir(model_name_or_path):
             self.model_path = model_name_or_path
         else:

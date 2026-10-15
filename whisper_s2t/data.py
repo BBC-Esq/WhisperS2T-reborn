@@ -79,32 +79,23 @@ class BasicSegmenter:
 
 
 class WhisperDataLoader:
-    def __init__(self, device, tokenizer, speech_segmenter, 
-                 dta_padding=3.0, 
-                 without_timestamps=True, 
+    def __init__(self, device, tokenizer, speech_segmenter,
+                 without_timestamps=True,
                  max_speech_len=29.0, 
                  max_initial_prompt_len=223,
-                 merge_chunks=True,
-                 use_dynamic_time_axis=False):
+                 merge_chunks=True):
 
         self.device = device
         self.tokenizer = tokenizer
         self.speech_segmenter = speech_segmenter
         self.basic_segmenter = BasicSegmenter(max_seg_len=max_speech_len)
-        self.dta_padding = int(dta_padding*SAMPLE_RATE)
         self.without_timestamps = without_timestamps
         self.max_speech_len = max_speech_len
         self.max_initial_prompt_len = max_initial_prompt_len
-        self.use_dynamic_time_axis = use_dynamic_time_axis
         self.merge_chunks = merge_chunks
 
     def data_collate_fn(self, batch):
-        if self.use_dynamic_time_axis:
-            max_len = min(max([_[3] for _ in batch]) + self.dta_padding, N_SAMPLES)
-        else:
-            max_len = N_SAMPLES
-
-        signal_batch = torch.stack([torch.from_numpy(pad_or_trim(_[0], length=max_len)).to(self.device) for _ in batch])
+        signal_batch = torch.stack([torch.from_numpy(pad_or_trim(_[0])).to(self.device) for _ in batch])
         seq_len = torch.tensor([_[3] for _ in batch]).to(self.device)
 
         prompt_batch = []

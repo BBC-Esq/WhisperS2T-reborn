@@ -42,8 +42,6 @@ class WhisperModel(ABC):
                  device_index=0,
                  compute_type="float16",
                  merge_chunks=True,
-                 dta_padding=3.0,
-                 use_dynamic_time_axis = False,
                  max_speech_len=29.0,
                  max_text_token_len=MAX_TEXT_TOKEN_LENGTH,
                  without_timestamps=True,
@@ -60,9 +58,6 @@ class WhisperModel(ABC):
         self.n_mels = n_mels
         self.merge_chunks = merge_chunks
         self.max_speech_len = max_speech_len
-
-        self.dta_padding = dta_padding
-        self.use_dynamic_time_axis = use_dynamic_time_axis
 
         self.without_timestamps = without_timestamps
         self.max_text_token_len = max_text_token_len
@@ -87,12 +82,10 @@ class WhisperModel(ABC):
         self.speech_segmenter = SpeechSegmenter(self.vad_model, device=self.device, **self.speech_segmenter_options)
 
         self.data_loader = WhisperDataLoader(
-            self.device, self.tokenizer, self.speech_segmenter, 
-            dta_padding=self.dta_padding,
+            self.device, self.tokenizer, self.speech_segmenter,
             without_timestamps=self.without_timestamps, 
             max_speech_len=self.max_speech_len, 
             max_initial_prompt_len=self.max_initial_prompt_len, 
-            use_dynamic_time_axis=self.use_dynamic_time_axis,
             merge_chunks=self.merge_chunks
         )
 
