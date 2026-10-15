@@ -146,7 +146,7 @@ class SpeechSegmenter:
         start_ends = self.get_speech_segments(speech_probs)
 
         if len(start_ends) == 0:
-            start_ends = [[0.0, self.max_seg_len]]
+            return start_ends, audio_signal
 
         start_ends[0][0] = max(0.0, start_ends[0][0])
         start_ends[-1][1] = min(audio_duration, start_ends[-1][1])
