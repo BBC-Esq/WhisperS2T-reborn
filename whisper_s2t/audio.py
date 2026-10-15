@@ -237,5 +237,6 @@ class LogMelSpectogram(nn.Module):
         x = torch.clamp(x, min=1e-10).log10() # log_mels
         x = torch.maximum(x, torch.amax(x, dim=(1, 2), keepdims=True) - 8.0) # clip
         x = (x + 4.0) / 4.0 # scale
+        x = x.masked_fill(torch.arange(x.shape[-1], device=x.device) >= seq_len[:, None, None], 0.0)
 
         return x, seq_len
