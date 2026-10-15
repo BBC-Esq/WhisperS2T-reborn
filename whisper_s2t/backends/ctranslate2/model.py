@@ -107,6 +107,7 @@ class WhisperModelCT2(WhisperModel):
             asr_options = {}
         self.asr_options = FAST_ASR_OPTIONS.copy()
         self.asr_options.update(asr_options)
+        model_kwargs.setdefault('without_timestamps', self.asr_options['without_timestamps'])
 
         if self.asr_options['word_timestamps']:
             aligner_name = self.asr_options['word_aligner_model']
