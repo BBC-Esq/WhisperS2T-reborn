@@ -5,7 +5,7 @@ import ctranslate2
 import numpy as np
 
 from .tokenizer import Tokenizer
-from ...hub import _normalize_compute_type, download_model
+from ...hub import _n_mels, _normalize_compute_type, download_model
 
 
 from .. import WhisperModel
@@ -103,31 +103,41 @@ class WhisperModelCT2(WhisperModel):
             if (not self.model.is_multilingual) and aligner_name == 'tiny':
                 aligner_name = 'tiny.en'
 
-            self.aligner_model_path = download_model(aligner_name, compute_type=compute_type,
-                                                     local_files_only=local_files_only, cache_dir=cache_dir)
-            if os.path.normpath(self.aligner_model_path) == os.path.normpath(self.model_path):
-                self.aligner_model = self.model
-            else:
-                self.aligner_model = ctranslate2.models.Whisper(self.aligner_model_path,
-                                                                device=device,
-                                                                device_index=device_index,
-                                                                compute_type=compute_type,
-                                                                intra_threads=cpu_threads,
-                                                                inter_threads=num_workers)
-
-                if self.aligner_model.n_mels != self.model.n_mels:
+            if _n_mels(aligner_name) not in (None, self.model.n_mels):
+                if 'word_aligner_model' in asr_options:
                     warnings.warn(
-                        f"word_aligner_model '{aligner_name}' expects {self.aligner_model.n_mels} mel bins "
+                        f"word_aligner_model '{aligner_name}' expects {_n_mels(aligner_name)} mel bins "
                         f"but the main model produces {self.model.n_mels}; "
                         f"using the main model for word alignment instead."
                     )
+                self.aligner_model_path = self.model_path
+                self.aligner_model = self.model
+            else:
+                self.aligner_model_path = download_model(aligner_name, compute_type=compute_type,
+                                                         local_files_only=local_files_only, cache_dir=cache_dir)
+                if os.path.normpath(self.aligner_model_path) == os.path.normpath(self.model_path):
                     self.aligner_model = self.model
-                elif self.aligner_model.is_multilingual != self.model.is_multilingual:
-                    warnings.warn(
-                        f"word_aligner_model '{aligner_name}' (multilingual={self.aligner_model.is_multilingual}) "
-                        f"does not match the main model (multilingual={self.model.is_multilingual}); "
-                        f"word timestamps may be inaccurate due to a tokenizer mismatch."
-                    )
+                else:
+                    self.aligner_model = ctranslate2.models.Whisper(self.aligner_model_path,
+                                                                    device=device,
+                                                                    device_index=device_index,
+                                                                    compute_type=compute_type,
+                                                                    intra_threads=cpu_threads,
+                                                                    inter_threads=num_workers)
+
+                    if self.aligner_model.n_mels != self.model.n_mels:
+                        warnings.warn(
+                            f"word_aligner_model '{aligner_name}' expects {self.aligner_model.n_mels} mel bins "
+                            f"but the main model produces {self.model.n_mels}; "
+                            f"using the main model for word alignment instead."
+                        )
+                        self.aligner_model = self.model
+                    elif self.aligner_model.is_multilingual != self.model.is_multilingual:
+                        warnings.warn(
+                            f"word_aligner_model '{aligner_name}' (multilingual={self.aligner_model.is_multilingual}) "
+                            f"does not match the main model (multilingual={self.model.is_multilingual}); "
+                            f"word timestamps may be inaccurate due to a tokenizer mismatch."
+                        )
 
         self.generate_kwargs = {
             "max_length": max_text_token_len,

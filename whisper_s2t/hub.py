@@ -91,9 +91,28 @@ _MODELS = {
 
 _MODELS["large"] = _MODELS["large-v3"]
 
+_128_MEL_MODELS = {"large-v3", "large", "large-v3-turbo", "distil-large-v3", "distil-large-v3.5"}
+
 
 def available_models() -> List[str]:
     return list(_MODELS.keys())
+
+
+def _n_mels(size_or_id: str) -> Optional[int]:
+    if size_or_id not in _MODELS:
+        return None
+    return 128 if size_or_id in _128_MEL_MODELS else 80
+
+
+def default_word_aligner(size: str) -> Optional[str]:
+    if size not in _MODELS:
+        raise ValueError(
+            "Invalid model size '%s', expected one of: %s"
+            % (size, ", ".join(_MODELS.keys()))
+        )
+    if size in _128_MEL_MODELS:
+        return None
+    return "tiny.en" if size.endswith(".en") else "tiny"
 
 
 def download_model(

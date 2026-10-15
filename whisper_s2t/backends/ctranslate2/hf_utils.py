@@ -1,1 +1,1 @@
-from ...hub import _MODELS, available_models, download_model
+from ...hub import _MODELS, available_models, default_word_aligner, download_model
