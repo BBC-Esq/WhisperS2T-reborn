@@ -256,6 +256,10 @@ class WhisperModelCT2(WhisperModel):
 
         return word_timings
 
+    def _collapsed(self, sequence, frames):
+        seconds = frames/FRAMES_PER_SECOND
+        return seconds >= 5 and len([t for t in sequence if t < self.tokenizer.eot]) < seconds
+
     def generate_segment_batched(self, features, prompts, seq_lens=None, seg_metadata=None):
 
         if self.device == 'cpu':
@@ -266,6 +270,18 @@ class WhisperModelCT2(WhisperModel):
         result = self.model.generate(ctranslate2.StorageView.from_array(features),
                                      prompts,
                                      **self.generate_kwargs)
+
+        if seq_lens is not None:
+            retry = [idx for idx, r in enumerate(result)
+                     if prompts[idx][-1] == self.tokenizer.no_timestamps
+                     and self._collapsed(r.sequences_ids[0], int(seq_lens[idx]))]
+            if retry:
+                retried = self.model.generate(ctranslate2.StorageView.from_array(features[retry]),
+                                              [prompts[idx][:-1] + [self.tokenizer.timestamp_begin] for idx in retry],
+                                              **self.generate_kwargs)
+                for idx, r in zip(retry, retried):
+                    if not self._collapsed(r.sequences_ids[0], int(seq_lens[idx])):
+                        result[idx] = r
 
         texts = self.tokenizer.decode_batch([x.sequences_ids[0] for x in result])
 
@@ -282,7 +298,7 @@ class WhisperModelCT2(WhisperModel):
                 response[-1]['no_speech_prob'] = r.no_speech_prob
 
         if self.asr_options['word_timestamps']:
-            text_tokens = [x.sequences_ids[0]+[self.tokenizer.eot] for x in result]
+            text_tokens = [[t for t in x.sequences_ids[0] if t < self.tokenizer.eot]+[self.tokenizer.eot] for x in result]
             sot_len = 4 if self.tokenizer.multilingual else 2
             sot_seqs = [tuple(_[-sot_len:]) for _ in prompts]
             word_timings = self.align_words(features, texts, text_tokens, sot_seqs, seq_lens, seg_metadata)
