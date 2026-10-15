@@ -14,15 +14,10 @@ from ...configs import *
 
 FAST_ASR_OPTIONS = {
     "beam_size": 1,
-    "best_of": 1,
     "patience": 1,
     "length_penalty": 1,
     "repetition_penalty": 1.01,
     "no_repeat_ngram_size": 0,
-    "compression_ratio_threshold": 2.4,
-    "log_prob_threshold": -1.0,
-    "no_speech_threshold": 0.5,
-    "prefix": None,
     "suppress_blank": True,
     "suppress_tokens": [-1],
     "without_timestamps": True,
@@ -37,15 +32,10 @@ FAST_ASR_OPTIONS = {
 
 BEST_ASR_CONFIG = {
     "beam_size": 5,
-    "best_of": 1,
     "patience": 2,
     "length_penalty": 1,
     "repetition_penalty": 1.01,
     "no_repeat_ngram_size": 0,
-    "compression_ratio_threshold": 2.4,
-    "log_prob_threshold": -1.0,
-    "no_speech_threshold": 0.5,
-    "prefix": None,
     "suppress_blank": True,
     "suppress_tokens": [-1],
     "without_timestamps": True,
