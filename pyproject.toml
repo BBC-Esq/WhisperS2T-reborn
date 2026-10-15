@@ -14,7 +14,7 @@ authors = [
 ]
 dependencies = [
     "ctranslate2>=4.8.1,<5.0.0",
-    "huggingface-hub",
+    "huggingface-hub>=0.23",
     "numpy>=1.26.4,<3.0.0",
     "platformdirs",
     "requests",

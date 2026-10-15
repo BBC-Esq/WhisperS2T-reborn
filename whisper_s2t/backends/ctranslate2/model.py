@@ -5,7 +5,7 @@ import ctranslate2
 import numpy as np
 
 from .tokenizer import Tokenizer
-from ...hub import download_model
+from ...hub import _normalize_compute_type, download_model
 
 
 from .. import WhisperModel
@@ -46,15 +46,6 @@ BEST_ASR_CONFIG = {
     "return_no_speech_prob": True,
     "word_aligner_model": 'tiny',
 }
-
-
-_SUPPORTED_COMPUTE_TYPES = {"float32", "float16", "bfloat16"}
-
-
-def _normalize_compute_type(compute_type: str) -> str:
-    if compute_type in _SUPPORTED_COMPUTE_TYPES:
-        return compute_type
-    return "float32"
 
 
 class WhisperModelCT2(WhisperModel):

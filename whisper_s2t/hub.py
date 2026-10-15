@@ -7,6 +7,15 @@ from typing import List, Optional
 from . import CACHE_DIR
 
 
+_SUPPORTED_COMPUTE_TYPES = {"float32", "float16", "bfloat16"}
+
+
+def _normalize_compute_type(compute_type: str) -> str:
+    if compute_type in _SUPPORTED_COMPUTE_TYPES:
+        return compute_type
+    return "float32"
+
+
 _MODELS = {
     "tiny": {
         "float32": "ctranslate2-4you/whisper-tiny-ct2-float32",
@@ -93,6 +102,8 @@ def download_model(
     output_dir: Optional[str] = None,
     local_files_only: bool = False,
     cache_dir: Optional[str] = None,
+    *,
+    force_download: bool = False,
 ):
     if re.match(r".*/.*", size_or_id):
         repo_id = size_or_id
@@ -104,7 +115,7 @@ def download_model(
                 % (size_or_id, ", ".join(_MODELS.keys()))
             )
 
-        repo_id = model_variants[compute_type]
+        repo_id = model_variants[_normalize_compute_type(compute_type)]
 
     allow_patterns = [
         "config.json",
@@ -116,16 +127,19 @@ def download_model(
     kwargs = {
         "local_files_only": local_files_only,
         "allow_patterns": allow_patterns,
+        "force_download": force_download,
     }
 
     if output_dir is not None:
         kwargs["local_dir"] = output_dir
-        kwargs["local_dir_use_symlinks"] = False
 
     if cache_dir is not None:
         kwargs["cache_dir"] = cache_dir
     else:
         kwargs["cache_dir"] = f"{CACHE_DIR}/models"
+
+    if local_files_only:
+        return huggingface_hub.snapshot_download(repo_id, **kwargs)
 
     try:
         return huggingface_hub.snapshot_download(repo_id, **kwargs)
