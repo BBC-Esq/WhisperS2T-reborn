@@ -5,7 +5,7 @@ import ctranslate2
 import numpy as np
 
 from .tokenizer import Tokenizer
-from .hf_utils import download_model
+from ...hub import download_model
 
 
 from .. import WhisperModel

@@ -13,7 +13,6 @@ __all__ = ["load_model", "write_outputs", "CACHE_DIR", "BASE_PATH", "__version__
 BASE_PATH = os.path.dirname(__file__)
 
 CACHE_DIR = user_cache_dir("whisper_s2t")
-os.makedirs(CACHE_DIR, exist_ok=True)
 
 
 def load_model(model_identifier="large-v3", **model_kwargs):
