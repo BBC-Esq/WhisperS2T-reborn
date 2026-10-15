@@ -58,6 +58,9 @@ class WhisperModelCT2(WhisperModel):
                  compute_type="float16",
                  max_text_token_len=MAX_TEXT_TOKEN_LENGTH,
                  asr_options=None,
+                 *,
+                 cache_dir=None,
+                 local_files_only=False,
                  **model_kwargs):
 
         compute_type = _normalize_compute_type(compute_type)
@@ -69,7 +72,8 @@ class WhisperModelCT2(WhisperModel):
         if os.path.isdir(model_name_or_path):
             self.model_path = model_name_or_path
         else:
-            self.model_path = download_model(model_name_or_path, compute_type=compute_type)
+            self.model_path = download_model(model_name_or_path, compute_type=compute_type,
+                                             local_files_only=local_files_only, cache_dir=cache_dir)
 
         self.model = ctranslate2.models.Whisper(self.model_path,
                                                 device=device,
@@ -99,7 +103,8 @@ class WhisperModelCT2(WhisperModel):
             if (not self.model.is_multilingual) and aligner_name == 'tiny':
                 aligner_name = 'tiny.en'
 
-            self.aligner_model_path = download_model(aligner_name, compute_type=compute_type)
+            self.aligner_model_path = download_model(aligner_name, compute_type=compute_type,
+                                                     local_files_only=local_files_only, cache_dir=cache_dir)
             if os.path.normpath(self.aligner_model_path) == os.path.normpath(self.model_path):
                 self.aligner_model = self.model
             else:
