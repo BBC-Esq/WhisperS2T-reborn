@@ -85,6 +85,8 @@ To enable word-level timestamps, load the model with:
 model = whisper_s2t.load_model("large-v3", asr_options={'word_timestamps': True})
 ```
 
+Word timestamps use a small aligner model (`tiny`, or `tiny.en` for English-only models) that is downloaded along with the main model. The large-v3 family (`large-v3`, `large-v3-turbo`, `distil-large-v3`, `distil-large-v3.5`) aligns with itself instead. `whisper_s2t.default_word_aligner(name)` tells you which one a model uses (`None` when it aligns with itself).
+
 #### Running on CPU
 
 ```py
@@ -109,6 +111,33 @@ Pass `compute_type="float32"` — CTranslate2 does not run float16 on CPU. Small
 | Distil Large V3.5 | `distil-large-v3.5` |
 
 All models are available in `float16`, `float32`, and `bfloat16` compute types via [CTranslate2-4you](https://huggingface.co/ctranslate2-4you) on Hugging Face.
+
+## Using models offline
+
+Models are downloaded from Hugging Face the first time you load them. To fill a folder in advance (for example, for a machine without internet access), download the model, plus its word aligner if you use word timestamps:
+
+```py
+import whisper_s2t
+
+whisper_s2t.download_model("small.en", compute_type="float32", cache_dir="/models")
+
+aligner = whisper_s2t.default_word_aligner("small.en")  # "tiny.en"; None for the large-v3 family
+if aligner is not None:
+    whisper_s2t.download_model(aligner, compute_type="float32", cache_dir="/models")
+```
+
+Then load from that folder without touching the network:
+
+```py
+model = whisper_s2t.load_model("small.en", device="cpu", compute_type="float32",
+                               cache_dir="/models", local_files_only=True,
+                               asr_options={'word_timestamps': True})
+```
+
+- Download with the same `compute_type` you will load with. Each precision is a separate download; other types such as `int8` use the `float32` files.
+- With `local_files_only=True`, a model missing from the folder raises huggingface_hub's `LocalEntryNotFoundError` (a `FileNotFoundError`) right away, without trying the network.
+- `cache_dir` uses the Hugging Face cache layout (`models--<org>--<repo>/...`). Without it, models go to the library's own cache.
+- `download_model()` also takes `force_download=True` to fetch the files again, and `output_dir=` to save a plain copy of the files in a folder, which `load_model()` accepts as the model identifier.
 
 ## Benchmarks
 
